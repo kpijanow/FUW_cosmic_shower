@@ -1,10 +1,10 @@
 import serial as serial
 import binascii
 
-class readOut():
+class ReadOut():
     line = b''
     new = False
-    events = 
+    events = list()
     
     def get2Bytes(n):
         global line
@@ -50,7 +50,10 @@ class readOut():
                     t2[i] += 40
 
     def updateEvents():
-        
+        t = [0, 0, 0, 0, 0, 0, 0, 0]
+        t[1:5] = self.t1
+        t[4:] = self.t2
+        self.events.append(t)
 
     def readLine(line):
         ser.close
@@ -72,5 +75,16 @@ class readOut():
             else:
                 getTimeTicks(line)
 
-    
+    def readLoop:
+        ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, bytesize = 8, parity = 'N', stopbits = 1, xonxoff = True, timeout = 0)
+        while 1:
+            ser.close
+            line = ser.readline()
+            if line != b'':
+                readLine(line)
+            
+    def getEvents():
+        events0 = events
+        events = []
+        return events0
             
