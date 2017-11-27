@@ -6,7 +6,7 @@ import threading
 
 detectedMuons = 0
 
-class Event(Constants):
+class Event(constants.Constants):
 
     def __init__(self, line):
         self.t1 = np.array(line[0:4]) ## ??
@@ -34,14 +34,14 @@ class Event(Constants):
 ##----------------------------------------------
 ##    vectors start here and it's crap
 ##----------------------------------------------    
-    def getPoint(n):                                ## ooops
+    def getPoint(self, n):                                ## ooops
 ##        rho = Constants.c*t1[n]
 ##        p = np.array([Constants.det_X[n], Constants.det_Y[n], 0])
 ##        v = p - p0
 ##        distance = math.sqrt(sum(j**2 for j in v))
 ##        theta = math.pi/2 - math.acos(rho/distance)
 ##        z = distance*math.tan(theta)
-        p = np.array([Constants.det_X[n], Constants.det_Y[n], t1[n]])
+        p = np.array([constants.det_X[n], constants.det_Y[n], self.t1[n]])
 ##        p = np.array([Constants.det_X[n], Constants.det_Y[n], z])
         return p
 
@@ -50,13 +50,13 @@ class Event(Constants):
             return 0
         else:            
 ##            t = np.array(self.t1)           
-            t_min = np.argpartition(t1,2)    ## where was the first hit -> this is our reference
-            if t1[t_min[:2]][0]==0:
-                t_first = t1[t_min[:2][1]]
+            t_min = np.argpartition(self.t1,2)    ## where was the first hit -> this is our reference
+            if self.t1[t_min[:2]][0]==0:
+                t_first = t1[t_min[:2][1]]      ##  reference for exaple to t1 as self.t1
             else:
                 t_first = t1[t_min[:2][0]]
             [firstDet], = np.where(t1==t_first)
-            p0 = np.array([Constants.det_X[firstDet], Constants.det_Y[firstDet], 0])
+            p0 = np.array([constants.det_X[firstDet], constants.det_Y[firstDet], 0])
 ##            print(firstDet)
             detPoints = []                  ## detectors with next hits
             p = np.zeros((3,3)) 
@@ -81,9 +81,10 @@ class Event(Constants):
 ##-----------------------------------------
 ##-----------------------------------------
 def read():
-    lines = readout.ReadOut()
+    readout.readLoop()
 
 def ana1():
+    lines = readout.getEvents()
     for i in range(len(lines)):
         evt = Event(lines[i])
 
