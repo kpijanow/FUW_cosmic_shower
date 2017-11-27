@@ -73,6 +73,8 @@ class ReadOut():
                 self.getTimeTicks(self.line)
 
     def readLoop(self):
+        """readout loop that should run in background"""
+        
         ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, bytesize = 8, parity = 'N', stopbits = 1, xonxoff = True, timeout = 0)
         while 1:
             ser.close
@@ -81,6 +83,12 @@ class ReadOut():
                 self.readLine()
             
     def getEvents(self):
+        """Get recorded events and clear the list
+        returns list of events with structure:
+            [t1_1, t1_2, t1_3, t1_4, t2_1, t2_2, t2_3, t2_4, T]
+        where: t1_x - is start of the signal in ns form the x-th detector
+               t2_x - is start of the signal in ns form the x-th detector
+               T    - is an absolute time of the signal ## not yet added"""
         events0 = self.events
         self.events = []
         return events0
