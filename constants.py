@@ -1,5 +1,4 @@
-class Constants:
-    
+class Constants:  
     def __init__(self):
         self.cable_length = 15
         self.det_X = self.calbelength * [1, 1, -1, -1]
@@ -7,6 +6,7 @@ class Constants:
         self.det_area = 0.31 * 0.27
         self.readOut_eff = 0.95
         self.det_eff = 0.75
+        self.c = 0.298 # 29.8 cm/ns from https://paulba.no/paper/Liu.pdf
 
     def getDet_X(self):
         return self.det_X

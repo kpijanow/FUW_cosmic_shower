@@ -53,7 +53,7 @@ class ReadOut():
 
     def updateEvents(self):
         t = [0, 0, 0, 0, 0, 0, 0, 0]
-        t[1:5] = self.t1
+        t[1:5] = self.t1    ## why not t[0:4]?
         t[4:] = self.t2
         self.events.append(t)
 
