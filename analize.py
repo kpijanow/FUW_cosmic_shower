@@ -35,7 +35,7 @@ class Event(Constants):
 ##    vectors start here and it's crap
 ##----------------------------------------------
     def getPoint(n):
-        rho = c*t1[n]
+        rho = Constants.c*t1[n]
         p = np.array([Constants.det_X[n], Constants.det_Y[n], 0])
         v = p - p0
         distance = math.sqrt(sum(j**2 for j in v))
