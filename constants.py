@@ -1,10 +1,11 @@
 class Constants:
     cable_length = 15
-    det_X = calbelength * [1, 1, -1, -1]
-    det_Y = cable_length * [1, -1, -1, 1]
+    det_X = calbe_length*2**(1/2) * [1, 1, -1, -1]
+    det_Y = cable_length*2**(1/2) * [1, -1, -1, 1]
     det_area = 0.31 * 0.27
     readOut_eff = 0.95
     det_eff = 0.75
+    c = 0.298 # 29.8 cm/ns from https://paulba.no/paper/Liu.pdf
 
     getDet_X():
         return det_X
