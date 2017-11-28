@@ -1,5 +1,6 @@
 import serial as serial
 import binascii
+import time
 
 class ReadOut():
     
@@ -7,8 +8,10 @@ class ReadOut():
         self.line = b''
         self.new = False
         self.events = list()
-        self.t1 = [0, 0, 0, 0]
-        self.t2 = [0, 0, 0, 0]
+        self.t1 = [-5, -5, -5, -5]
+        self.t2 = [-5, -5, -5, -5]
+        self.time0 = time.time() #global time0
+        self.timeE = 0          #global event time - global time0
     
     def get2Bytes(self, n):
         return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
@@ -31,15 +34,17 @@ class ReadOut():
         for i in range(4):
             if self.checkIfGoodData(i * 2):
                 bits = self.get2Bytes(9 + i * 6)
-                self.t1[i] = int(bits[3:], 2)    
-            else:
-                self.t1[i] = -1
+                self.t1[i] = int(bits[3:], 2)
+                #print("if " + str(i) + " " + str(self.t1[i]))
+            elif self.t1[i] < -1:
+                #print("el " + str(i) + " " + str(self.t1[i]))
+                self.t1[i] = -0.8
             
-            if self.checkIfGoodData(self.line, i * 2 + 1):
+            if self.checkIfGoodData(i * 2 + 1):
                 bits = self.get2Bytes(12 + i * 6)
                 self.t2[i] = int(bits[3:], 2)
-            else:
-                self.t1[i] = -1
+            elif self.t2[i] < -1:
+                self.t2[i] = -0.8
 
     def timeTicksToNanoS(self):
         self.t1[:] = [x*5/4.0 for x in self.t1]
@@ -52,25 +57,28 @@ class ReadOut():
                     self.t2[i] += 40
 
     def updateEvents(self):
-        t = [0, 0, 0, 0, 0, 0, 0, 0]
+        t = [0, 0, 0, 0, 0, 0, 0, 0, 0]
         t[0:4] = self.t1
-        t[4:] = self.t2
+        t[4:8] = self.t2
+        t[8] = self.timeE
         self.events.append(t)
 
     def readLine(self):
         if len(self.line) == 74:
             if self.checkIfNewEvent():
+                self.timeE = time.time() - self.time0
                 self.new = True
                 self.timeTicksToNanoS()
                 self.checkIfGoodReadout()
                 self.updateEvents()
         
-                self.t1[:] = [0 for x in self.t1]
-                self.t2[:] = [0 for x in self.t2]
-                self.getTimeTicks(self.line)
+                self.t1[:] = [-5 for x in self.t1]
+                self.t2[:] = [-5 for x in self.t2]
+                self.getTimeTicks()
 		
             else:
-                self.getTimeTicks(self.line)
+                self.new = False
+                self.getTimeTicks()
 
     def readLoop(self):
         """readout loop that should run in background"""
@@ -88,7 +96,7 @@ class ReadOut():
             [t1_1, t1_2, t1_3, t1_4, t2_1, t2_2, t2_3, t2_4, T]
         where: t1_x - is start of the signal in ns form the x-th detector
                t2_x - is start of the signal in ns form the x-th detector
-               T    - is an absolute time of the signal ## not yet added"""
+               T    - is an absolute time of the signal in seconds form the start of the program"""
         events0 = self.events
         self.events = []
         return events0
