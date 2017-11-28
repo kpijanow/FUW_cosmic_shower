@@ -34,16 +34,16 @@ class Event(constants.Constants):
 ##----------------------------------------------
 ##    vectors start here and it's crap
 ##----------------------------------------------    
-    def getPoint(self, n):                                ## ooops
-##        rho = constants.v_muon*t1[n]
-##        p = np.array([constants.det_X[n], constants.det_Y[n], 0])
-##        v = p - p0
-##        distance = math.sqrt(sum(j**2 for j in v))
-##        theta = math.pi/2 - math.acos(rho/distance)
-##        z = distance*math.tan(theta)
-        p = np.array([constants.det_X[n], constants.det_Y[n], self.t1[n]])
-##        p = np.array([constants.det_X[n], constants.det_Y[n], z])
-        return p
+##    def getPoint(self, n):                                ## ooops
+####        rho = constants.v_muon*t1[n]
+####        p = np.array([constants.det_X[n], constants.det_Y[n], 0])
+####        v = p - p0
+####        distance = math.sqrt(sum(j**2 for j in v))
+####        theta = math.pi/2 - math.acos(rho/distance)
+####        z = distance*math.tan(theta)
+##        p = np.array([constants.det_X[n], constants.det_Y[n], self.t1[n]])
+####        p = np.array([constants.det_X[n], constants.det_Y[n], z])
+##        return p
 
     def Direction(self):
         if self.nMuons < 3:
@@ -56,14 +56,34 @@ class Event(constants.Constants):
 
             if len(detHits)>3:
               detRef = detHits[0]
+              detV1 = detHits[1]
+              detV2 = detHits[-1]
+              detV3 = detHits[-2]
             else:
               detRef = detHits[1]
+              detV1 = detHits[0]
+              detV2 = detHits[2]
               
             p = []
             for i in range(len(detHits)):
-              p.append(np.array([constants.det_X[i], constants.det_Y[i], t1[i]]))
+              p.append(np.array([constants.det_X[i], constants.det_Y[i], self.t1[i]]))
             p0 = p[detRef]
-
+            p1 = p[detV1]
+            p2 = p[detV2]
+            v1 = p1 - p0
+            v2 = p2 - p0
+            print(v1)
+            print(v2)
+            print(np.cross(v1, v2))
+            print(np.cross(v2, v1))
+            if detV3:
+              p3 = p[detV3]
+              v3 = p3-p0
+              print(v3)
+              print(np.cross(v1,v3))
+              print(np.cross(v2,v3))
+            vector = np.cross(v1, v2)
+            return vector
 ##            for i in range(len(detHits)):
 ##              if i!=detRef:
 ##                rho = constants.v_muon*t1[i]
@@ -75,15 +95,15 @@ class Event(constants.Constants):
 ##                z = distance*math.tan(theta)
 ##                p[i] = np.array([constants.det_X[i], constants.det_Y[i], z])
 ####            print(p)
-            v = []
-            for i in range(len(detHits)):
-              if i!=detRef:
-                v.append(np.array(p[i]-p0))
-            print(v)
-            print(np.cross(v[0], v[1]))
-            print(np.cross(v[0], v[2]))
-            print(np.cross(v[1], v[2]))
-            return np.cross(v[0], v[1])
+##            v = []
+##            for i in range(len(detHits)):
+##              if i!=detRef:
+##                v.append(np.array(p[i]-p0))
+##            print(v)
+##            print(np.cross(v[0], v[1]))
+##            print(np.cross(v[0], v[2]))
+##            print(np.cross(v[1], v[2]))
+##            return np.cross(v[0], v[1])
 ####            t = np.array(self.t1)           
 ##            t_min = np.argpartition(self.t1,2)    ## where was the first hit -> this is our reference
 ##            if self.t1[t_min[:2]][0]==0:
