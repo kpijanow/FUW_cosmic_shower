@@ -6,7 +6,7 @@ class Constants:
         self.det_area = 0.31 * 0.27
         self.readOut_eff = 0.95
         self.det_eff = 0.75
-        self.c = 0.298 # 29.8 cm/ns from https://paulba.no/paper/Liu.pdf
+        self.v_muon = 0.298 # 29.8 cm/ns from https://paulba.no/paper/Liu.pdf
 
     def getDet_X(self):
         """list of X positions of all 4 detectors"""
