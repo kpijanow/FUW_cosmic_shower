@@ -10,18 +10,20 @@ import time
 class Event():
     
     def __init__(self, line):
+        self.const = constants.Constants()
         self.t1 = np.array(line[0:4]) 
-        self.t2 = np.array(line[4:])
+        self.t2 = np.array(line[4:8])
 ##        self.time = 0 
         self.time = line[8]        
         self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
         self.nMuons = self.Coincidence()
-        self.vector = self.Direction()
-        self.Flux()
+        #self.vector = self.Direction()
+        self.vector = self.directionKarol()
+        #self.Flux() #FIXME
         self.newMinute = self.NewMinute()
         self.newHour = self.NewHour()
-        self.FluxPerMin()
-        self.UpdateTime()
+        #self.FluxPerMin() #FIXME
+        #self.UpdateTime() #FIXME
         
     
 
@@ -30,14 +32,17 @@ class Event():
         for i in range(4):
             if self.ToT:
                 n+=1
-        return n
+        #return n
+        return np.sum(self.t1 != -1) #if we are using only t1 than coincidence should be nr of
+                                     #times that t1 was read properly
 
     def Flux(self):
 ##        global detectedMuons
-        analize.detectedMuons += self.nMuons
+        analize.detectedMuons += self.nMuons #sorry, but not this way
 
     def UpdateTime(self):
-        analize.time = self.time
+        analize.time = self.time #sorry, but not this way. If you are calling event from analize
+                                 #than you do not have the access to analize this way
         
     def NewMinute(self):
         if self.time % 60:  return True
@@ -49,7 +54,7 @@ class Event():
       
     def FluxPerMin(self):
 ##        global muonsInMin, flux_per_min
-        analize.mounsInMin += self.nMuons
+        analize.mounsInMin += self.nMuons #same as previously
         if self.newMinute:
             analize.flux_per_min.append(analize.muonsInMin/(60*constants.det_area))
             analize.muonsInMin = 0
@@ -163,3 +168,30 @@ class Event():
 ##            return vector
 ##-----------------------------------------
 ##-----------------------------------------
+
+    def directionKarol(self):
+        if self.nMuons != 3:
+            return 0
+        else:
+            i = np.nonzero(self.t1 != -1)
+            print(i)
+            print(i[0][0])
+            print(i[0][1])
+            print(self.const.det_X)
+            print(self.const.det_X[i[0][0]])
+            print(self.const.det_X[i[0][1]])
+            v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
+                  self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
+            
+            v2 = [self.const.det_X[i[0][2]] - self.const.det_X[i[0][0]],
+                  self.const.det_Y[i[0][2]] - self.const.det_Y[i[0][0]] ]
+            
+            a = [self.const.v_muon * (self.t1[i[0][1]] - self.t1[i[0][0]]), self.const.v_muon * (self.t1[i[0][2]] - self.t1[i[0][0]])]
+
+            vector = [0, 0, 0]
+            vector[0] = (a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
+            vector[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
+            vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+            return vector
+
+            

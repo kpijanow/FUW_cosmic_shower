@@ -1,8 +1,11 @@
+import numpy as np
+
 class Constants:  
     def __init__(self):
         self.cable_length = 15
-        self.det_X = self.calbelength * [1, 1, -1, -1]
-        self.det_Y = self.cable_length * [1, -1, -1, 1]
+        self.det_X = self.cable_length/(2**(1/2)) * np.array([1.0, 1.0, -1.0, -1.0])
+        self.det_Y = self.cable_length/(2**(1/2)) * np.array([1.0, -1.0, -1.0, 1.0])
+        #self.det_Z = [1, 1, 1, 1]
         self.det_area = 0.31 * 0.27
         self.readOut_eff = 0.95
         self.det_eff = 0.75
