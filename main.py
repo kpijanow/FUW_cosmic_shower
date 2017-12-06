@@ -10,16 +10,20 @@ print("Constructor")
 
 #thread1 = threading.Thread(target = ReadOut.readLoop)
 thread2 = threading.Thread(target = Analize.anaLoop)
+thread3 = threading.Thread(target = Analize.GetHourFlux)
 print("Thread init")
-#thread1.start()
+thread3.start()
 thread2.start()
 print("Thread start")
 #thread1.join()
 #thread2.join()
 print("Thread join")
 
+i = 0
+
 while 1:
-    print("while")
+    i += 1
+##    print("while")
     #lines = ReadOut.getEvents()
     hour_flux = Analize.GetTotalFlux()
 ##    for i in range(len(lines)):

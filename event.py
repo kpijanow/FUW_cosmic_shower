@@ -30,15 +30,15 @@ class Event():
     def Coincidence(self):
         n = 0
         for i in range(4):
-            if self.ToT:
+            if self.t1[i] and self.t1[i]!=-1:
                 n+=1
-        #return n
+##        return n
         return np.sum(self.t1 != -1) #if we are using only t1 than coincidence should be nr of
                                      #times that t1 was read properly
 
-    def Flux(self):
-##        global detectedMuons
-        analize.detectedMuons += self.nMuons #sorry, but not this way
+##    def Flux():
+####        global detectedMuons
+##        return self.nMuons #sorry, but not this way
 
     def UpdateTime(self):
         analize.time = self.time #sorry, but not this way. If you are calling event from analize
@@ -49,17 +49,17 @@ class Event():
         else:               return False
 
     def NewHour(self):
-        if self.time % 60:  return True
+        if self.time % 60:  return True  #is it ok?
         else:               return False
       
     def FluxPerMin(self):
 ##        global muonsInMin, flux_per_min
         analize.mounsInMin += self.nMuons #same as previously
         if self.newMinute:
-            analize.flux_per_min.append(analize.muonsInMin/(60*constants.det_area))
-            analize.muonsInMin = 0
+            flux_per_min.append(analize.muonsInMin/(60*self.const.det_area))
+            muonsInMin = 0
             if self.newHour:
-                analize.flux_hour = analize.flux_per_min
+                flux_hour = analize.flux_per_min
                 analize.flux_per_min = []
                 
         
@@ -170,16 +170,8 @@ class Event():
 ##-----------------------------------------
 
     def directionKarol(self):
-        if self.nMuons != 3:
-            return 0
-        else:
+        if self.nMuons == 3:
             i = np.nonzero(self.t1 != -1)
-            print(i)
-            print(i[0][0])
-            print(i[0][1])
-            print(self.const.det_X)
-            print(self.const.det_X[i[0][0]])
-            print(self.const.det_X[i[0][1]])
             v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
                   self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
             
@@ -193,5 +185,29 @@ class Event():
             vector[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
             vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
             return vector
+        elif self.nMuons == 4:
+            vector = np.zeros(3)
+            
+            for iRef in range(4):
+                iD1 = (iRef + 1)%4
+                iD2 = (iRef + 3)%4
+                
+                v1 = [self.const.det_X[iD1] - self.const.det_X[iRef],
+                      self.const.det_Y[iD1] - self.const.det_Y[iRef] ]
+            
+                v2 = [self.const.det_X[iD2] - self.const.det_X[iRef],
+                      self.const.det_Y[iD2] - self.const.det_Y[iRef] ]
+            
+                a = [self.const.v_muon * (self.t1[iD1] - self.t1[iRef]), self.const.v_muon * (self.t1[iD2] - self.t1[iRef])]
+                vectorTemp = np.zeros(3)
+
+                vectorTemp[0] = (a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
+                vectorTemp[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
+                vectorTemp[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+                vector = vector + vectorTemp
+
+            return vector/4.0
+        else:
+            return None
 
             

@@ -35,9 +35,9 @@ class ReadOut():
             if self.checkIfGoodData(i * 2):
                 bits = self.get2Bytes(9 + i * 6)
                 self.t1[i] = int(bits[3:], 2)
-                #print("if " + str(i) + " " + str(self.t1[i]))
+##                print("if " + str(i) + " " + str(self.t1[i]))
             elif self.t1[i] < -1:
-                #print("el " + str(i) + " " + str(self.t1[i]))
+##                print("el " + str(i) + " " + str(self.t1[i]))
                 self.t1[i] = -0.8
             
             if self.checkIfGoodData(i * 2 + 1):
