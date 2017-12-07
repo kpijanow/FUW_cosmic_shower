@@ -1,3 +1,10 @@
+'''
+project: FUW_cosmic_shower
+    analize.py
+Analyze each read event,
+compute flux (per minute, total)
+'''
+
 import constants 
 import readout
 import event
@@ -16,26 +23,53 @@ class Analize():
         self.thread = threading.Thread(target = self.ReadOut.readLoop)
         self.thread.start()
         self.constants = constants.Constants()
+        self.time = event.Event.time
+        self.newMinute = self.NewMinute()
+        self.newHour = self.NewHour()
     
     def anaLoop(self):
         while(1):
             lines = self.ReadOut.getEvents()
             for i in range(len(lines)):
-##                print(lines[i])
                 evt = event.Event(lines[i])
-##                print(evt.nMuons)
                 if evt.vector is not None: print(evt.vector)
                 self.detectedMuons += evt.nMuons
-##                if np.sum(evt.vector) != 0: print(evt.vector)
-##                time.sleep(1) #do not use sleep if no necessary
+
+    def NewMinute(self):
+        if self.time % 60:  return True
+        else:               return False
+
+    def NewHour(self):
+        if self.time % 3600:  return True  
+        else:               return False
+                
+    def UpdateFlux(self):
+        self.muonsInMin += evt.nMuons
+        if self.newMinute:
+            flux_per_min.append(analize.muonsInMin/(60*self.const.det_area))
+            self.muonsInMin = 0
+        if self.newHour:
+            self.flux_hour = self.flux_per_min
+            self.flux_per_min = []
+        
             
-    def GetHourFlux(self):
-        time.sleep(50) #FIXME to tak nie moze byc, bo program tu sie zatrzymuje na 598 s i spi :)
-        print("Flux (per cm^2, per second) for every 1 minute in last hour: {}".format(self.flux_hour))
+    def HourFlux(self):
         return self.flux_hour
 
-    def GetTotalFlux(self):
-##        print("Total number of detected muons: {}".format(self.detectedMuons))
-##        print("Total time of experiment: {}".format(time.time() - self.time0))
-        return self.detectedMuons/(self.constants.det_area*(time.time() - self.ReadOut.time0)*self.constants.det_eff*self.constants.readOut_eff) #change of elapsed time
-        
+    def TotalFlux(self):
+        return self.detectedMuons/(self.constants.det_area*(event.Event.time - self.ReadOut.time0)*self.constants.det_eff*self.constants.readOut_eff) 
+
+#------------------ 
+#class independent:
+
+def GetHourFlux():
+    # every hour get list flux per min in previous hour -> then show average or whatever in a histo
+    print(Ana.HourFlux())
+    threading.Timer(3600, GetHourFlux).start()
+
+def GetTotalFlux():
+    # every hour update the total detected flux
+    print(Ana.TotalFlux())
+    threading.Timer(3600, GetTotalFlux).start()
+
+    
