@@ -16,8 +16,8 @@ print("Constructor")
 
 
 threadLoop = threading.Thread(target = Analize.anaLoop)
-threadHourFlux = threading.Thread(target = analize.GetHourFlux)
-threadTotalFlux = threading.Thread(target = analize.GetTotalFlux)
+threadHourFlux = threading.Thread(target = Analize.GetHourFlux)
+threadTotalFlux = threading.Thread(target = Analize.GetTotalFlux)
 print("Thread init")
 threadLoop.start()
 threadHourFlux.start()

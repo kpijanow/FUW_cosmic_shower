@@ -24,6 +24,7 @@ class Event():
         self.time = line[8]        
 ##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
         self.nMuons = self.Coincidence()
+        #self.vector = None
         self.vector = self.directionKarol()
         
     
@@ -40,6 +41,10 @@ class Event():
 
 
     def directionKarol(self):
+        #temp = self.t1[0]
+        #self.t1[0] = self.t1.max()
+        #self.t1[self.t1.argmax()] = temp
+        
         if self.nMuons == 3:
             i = np.nonzero(self.t1 != -1)
             v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
@@ -47,14 +52,16 @@ class Event():
             
             v2 = [self.const.det_X[i[0][2]] - self.const.det_X[i[0][0]],
                   self.const.det_Y[i[0][2]] - self.const.det_Y[i[0][0]] ]
-            
-            a = [self.const.v_muon * (self.t1[i[0][1]] - self.t1[i[0][0]]), self.const.v_muon * (self.t1[i[0][2]] - self.t1[i[0][0]])]
+            if v2[1] != 0:
+                a = [self.const.v_muon * (self.t1[i[0][1]] - self.t1[i[0][0]]), self.const.v_muon * (self.t1[i[0][2]] - self.t1[i[0][0]])]
 
-            vector = [0, 0, 0]
-            vector[0] = (a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
-            vector[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
-            vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
-            return vector
+                vector = [0, 0, 0]
+                vector[0] = -(a[1] * v1[1] - a[0] * v2[1])/(v1[0] * v2[1] - v1[1] * v2[0])
+                vector[1] = (a[1] * v1[0] - a[0] * v2[0])/(v1[0] * v2[1] - v1[1] * v2[0])
+                #print(vector[0])
+                #print(vector[1])
+                vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+                return vector
         elif self.nMuons == 4:
             vector = np.zeros(3)
             
@@ -73,7 +80,7 @@ class Event():
 
                 vectorTemp[0] = (a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
                 vectorTemp[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
-                vectorTemp[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+                vectorTemp[2] = math.sqrt(1 - vectorTemp[0]**2 - vectorTemp[1]**2)
                 vector = vector + vectorTemp
 
             return vector/4.0
