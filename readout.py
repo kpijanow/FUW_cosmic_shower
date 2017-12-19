@@ -1,6 +1,7 @@
 import serial as serial
 import binascii
 import time
+import glob, os
 
 class ReadOut():
     
@@ -12,6 +13,7 @@ class ReadOut():
         self.t2 = [-5, -5, -5, -5]
         self.time0 = time.time() #global time0
         self.timeE = 0          #global event time - global time0
+        self.ser = 0
     
     def get2Bytes(self, n):
         return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
@@ -80,16 +82,30 @@ class ReadOut():
                 self.new = False
                 self.getTimeTicks()
 
+    def connectToSerial(self):
+        os.chdir("/dev")
+        for file in glob.glob("ttyUSB*"):
+            print(file)
+            try:
+                self.ser = serial.Serial('/dev/' + str(file), baudrate = 115200, bytesize = 8, parity = 'N', stopbits = 1, xonxoff = True, timeout = 0)
+                print("connected to " + str(file))
+            except:
+                print(str(file) + " checked")
+
     def readLoop(self):
         """readout loop that should run in background"""
-        
-        ser = serial.Serial('/dev/ttyUSB0', baudrate = 115200, bytesize = 8, parity = 'N', stopbits = 1, xonxoff = True, timeout = 0)
+        self.connectToSerial()
         while 1:
-            ser.close
-            self.line = ser.readline()
-            if self.line != b'':
-                self.readLine()
-            
+            self.ser.close
+            try:
+                self.line = self.ser.readline()
+                if self.line != b'':
+                    self.readLine()
+            except:
+                print("USB disconected :( ")
+                self.connectToSerial()
+                time.sleep(5)
+                
     def getEvents(self):
         """Get recorded events and clear the list
         returns list of events with structure:

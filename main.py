@@ -16,13 +16,15 @@ print("Constructor")
 
 
 threadLoop = threading.Thread(target = Analize.anaLoop)
-threadHourFlux = threading.Thread(target = Analize.GetHourFlux)
-threadTotalFlux = threading.Thread(target = Analize.GetTotalFlux)
+threadHourFlux = threading.Thread(target = Analize.PrintHourFlux)
+threadTotalFlux = threading.Thread(target = Analize.PrintTotalFlux)
 print("Thread init")
 threadLoop.start()
 threadHourFlux.start()
 threadTotalFlux.start()
 print("Threads started")
 
-
-        
+#data needed for gui
+tableOfFluxInEveryMinute = Analize.flux_per_min
+totalFlux = Analize.TotalFlux()
+recentShowerVector = Analize.lastVector

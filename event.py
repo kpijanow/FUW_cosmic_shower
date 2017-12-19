@@ -56,11 +56,17 @@ class Event():
                 a = [self.const.v_muon * (self.t1[i[0][1]] - self.t1[i[0][0]]), self.const.v_muon * (self.t1[i[0][2]] - self.t1[i[0][0]])]
 
                 vector = [0, 0, 0]
-                vector[0] = -(a[1] * v1[1] - a[0] * v2[1])/(v1[0] * v2[1] - v1[1] * v2[0])
-                vector[1] = (a[1] * v1[0] - a[0] * v2[0])/(v1[0] * v2[1] - v1[1] * v2[0])
+                if v1[1] * v2[0] - v1[0] * v2[1] != 0:
+                    vector[0] = -(a[1] * v1[1] - a[0] * v2[1])/(v1[0] * v2[1] - v1[1] * v2[0])
+                    vector[1] = (a[1] * v1[0] - a[0] * v2[0])/(v1[0] * v2[1] - v1[1] * v2[0])
+                else:
+                    vector = [0, 0, 1]   
                 #print(vector[0])
                 #print(vector[1])
-                vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+                if (vector[0]**2 - vector[1]**2) <= 1:
+                    vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
+                else:
+                    vector = [0, 0, 1]
                 return vector
         elif self.nMuons == 4:
             vector = np.zeros(3)
@@ -78,9 +84,17 @@ class Event():
                 a = [self.const.v_muon * (self.t1[iD1] - self.t1[iRef]), self.const.v_muon * (self.t1[iD2] - self.t1[iRef])]
                 vectorTemp = np.zeros(3)
 
-                vectorTemp[0] = (a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
-                vectorTemp[1] = (a[0] * v1[0] - a[1] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
-                vectorTemp[2] = math.sqrt(1 - vectorTemp[0]**2 - vectorTemp[1]**2)
+                if v1[1] * v2[0] - v1[0] * v2[1] != 0:
+                    vectorTemp[0] = -(a[1] * v1[1] - a[0] * v2[1])/(v1[1] * v2[0] - v1[0] * v2[1])
+                    vectorTemp[1] = (a[1] * v1[0] - a[0] * v2[0])/(v1[1] * v2[0] - v1[0] * v2[1])
+                else:
+                    vectorTemp = [0, 0, 1]
+                    
+                if (vectorTemp[0]**2 - vectorTemp[1]**2) <= 1:
+                    vectorTemp[2] = math.sqrt(1 - vectorTemp[0]**2 - vectorTemp[1]**2)
+                else:
+                    vectorTemp = [0, 0, 1]
+                
                 vector = vector + vectorTemp
 
             return vector/4.0

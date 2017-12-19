@@ -12,6 +12,7 @@ import numpy as np
 import math as math
 import threading
 import time
+import sys
 
 class Analize():
 
@@ -28,6 +29,7 @@ class Analize():
         self.newHour = False
         self.flux_hour = []
         self.minutes = 0
+        self.lastVector = []
     
     def anaLoop(self):
         while(1):
@@ -37,9 +39,12 @@ class Analize():
                 self.time = evt.time
                 self.newMinute = self.NewMinute()
                 self.newHour = self.NewHour()
-                if evt.vector is not None: print(evt.vector)
+                if evt.vector is not None:
+                    print(evt.vector)
+                    self.lastVector = evt.vector
                 self.detectedMuons += evt.nMuons
                 self.UpdateFlux(evt)
+                sys.stdout.flush()
                 
 
     def NewMinute(self):
@@ -74,18 +79,14 @@ class Analize():
         else:
             return 0
 
-    def GetHourFlux(self):
+    def PrintHourFlux(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("h" + str(self.HourFlux()))
-        threading.Timer(3600, self.GetHourFlux).start()
+        threading.Timer(3600, self.PrintHourFlux).start()
 
-    def GetTotalFlux(self):
+    def PrintTotalFlux(self):
         # every hour update the total detected flux
         print("t" + str(self.TotalFlux()))
-        threading.Timer(3600, self.GetTotalFlux).start()
-        
-#------------------ 
-#class independent:
-
-
+        print(time.ctime())
+        threading.Timer(3600, self.PrintTotalFlux).start()
     
