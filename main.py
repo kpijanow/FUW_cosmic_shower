@@ -28,3 +28,4 @@ print("Threads started")
 tableOfFluxInEveryMinute = Analize.flux_per_min
 totalFlux = Analize.TotalFlux()
 recentShowerVector = Analize.lastVector
+recentShowerDetectors = Analize.lastDetectors

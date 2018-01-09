@@ -30,6 +30,7 @@ class Analize():
         self.flux_hour = []
         self.minutes = 0
         self.lastVector = []
+        self.lastDetectors
     
     def anaLoop(self):
         while(1):
@@ -42,6 +43,7 @@ class Analize():
                 if evt.vector is not None:
                     print(evt.vector)
                     self.lastVector = evt.vector
+                    self.lastDetectors = evt.detectorsFired
                 self.detectedMuons += evt.nMuons
                 self.UpdateFlux(evt)
                 sys.stdout.flush()

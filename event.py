@@ -26,6 +26,7 @@ class Event():
         self.nMuons = self.Coincidence()
         #self.vector = None
         self.vector = self.directionKarol()
+        self.detectorsFired = []
         
     
 
@@ -46,6 +47,7 @@ class Event():
         #self.t1[self.t1.argmax()] = temp
         
         if self.nMuons == 3:
+            self.detecotrsFired = self.t1 != -1
             i = np.nonzero(self.t1 != -1)
             v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
                   self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
@@ -69,6 +71,7 @@ class Event():
                     vector = [0, 0, 1]
                 return vector
         elif self.nMuons == 4:
+            self.detecotrsFired = self.t1 != -1
             vector = np.zeros(3)
             
             for iRef in range(4):
