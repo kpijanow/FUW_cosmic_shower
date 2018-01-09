@@ -23,14 +23,14 @@ class Event():
         self.t2 = np.array(line[4:8])
         self.time = line[8]        
 ##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
-        self.nMuons = self.Coincidence()
+        self.nMuons = self.coincidence()
         #self.vector = None
-        self.vector = self.directionKarol()
+        self.vector = self.getDirection()
         self.detectorsFired = []
         
     
 
-    def Coincidence(self):
+    def coincidence(self):
         n = 0
         for i in range(4):
             if self.t1[i] and self.t1[i]!=-1:
@@ -41,7 +41,7 @@ class Event():
 ##                                        but this doesn't sum how we want it 
 
 
-    def directionKarol(self):
+    def getDirection(self):
         #temp = self.t1[0]
         #self.t1[0] = self.t1.max()
         #self.t1[self.t1.argmax()] = temp
@@ -123,7 +123,7 @@ class Event():
 ####        p = np.array([constants.det_X[n], constants.det_Y[n], z])
 ##        return p
 
-    def Direction(self):
+    def Direction0(self):
         if self.nMuons < 3:
             return 0
         else:

@@ -14,6 +14,14 @@ class ReadOut():
         self.time0 = time.time() #global time0
         self.timeE = 0          #global event time - global time0
         self.ser = 0
+
+    def setDAQparameters(self):
+        if (self.ser.writable()):
+            self.ser.write(b'WC 0 F\r\n') #send signal to DAQ to read from 4 detectors
+                                          #and corelarion 1
+                                            
+            self.ser.flush()
+
     
     def get2Bytes(self, n):
         return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
@@ -95,6 +103,8 @@ class ReadOut():
     def readLoop(self):
         """readout loop that should run in background"""
         self.connectToSerial()
+        self.setDAQparameters()
+        
         while 1:
             self.ser.close
             try:
