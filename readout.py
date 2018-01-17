@@ -2,7 +2,18 @@ import serial as serial
 import binascii
 import time
 import glob, os
+import threading
 
+class ReadOutEventC():
+    def __init__(self, line0):
+        self.line = line0 #b''
+        self.new = False
+        self.events = list()
+        self.t1 = [-5, -5, -5, -5]
+        self.t2 = [-5, -5, -5, -5]
+        self.time0 = time.time() #global time0
+        self.timeE = 0          #global event time - global time0
+        
 class ReadOut():
     
     def __init__(self):
@@ -13,82 +24,102 @@ class ReadOut():
         self.t2 = [-5, -5, -5, -5]
         self.time0 = time.time() #global time0
         self.timeE = 0          #global event time - global time0
-        self.ser = 0
 
     def setDAQparameters(self):
         if (self.ser.writable()):
             self.ser.write(b'WC 0 F\r\n') #send signal to DAQ to read from 4 detectors
-                                          #and corelarion 1
-                                            
+                                          #and corelarion 1                                  
             self.ser.flush()
 
     
-    def get2Bytes(self, n):
-        return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
+    def get2Bytes(self, n, ReadOutEvent):
+        return bin(int(ReadOutEvent.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
 
-    def checkIfNewEvent(self):
-        bits = self.get2Bytes(9)
+    def checkIfNewEvent(self, ReadOutEvent):
+        bits = self.get2Bytes(9, ReadOutEvent)
         if bits[0] == '1':
             return True
         else:
             return False
 
-    def checkIfGoodData(self, i):
-        bits = self.get2Bytes(9 + i * 3)
+    def checkIfGoodData(self, i, ReadOutEvent):
+        bits = self.get2Bytes(9 + i * 3, ReadOutEvent)
         if bits[2] == '1':
             return True
         else:
             return False
 
-    def getTimeTicks(self):
+    def getTimeTicks(self, ReadOutEvent):
         for i in range(4):
-            if self.checkIfGoodData(i * 2):
-                bits = self.get2Bytes(9 + i * 6)
-                self.t1[i] = int(bits[3:], 2)
+            if self.checkIfGoodData(i * 2, ReadOutEvent):
+                bits = self.get2Bytes(9 + i * 6, ReadOutEvent)
+                ReadOutEvent.t1[i] = int(bits[3:], 2)
 ##                print("if " + str(i) + " " + str(self.t1[i]))
-            elif self.t1[i] < -1:
+            elif ReadOutEvent.t1[i] < -1:
 ##                print("el " + str(i) + " " + str(self.t1[i]))
-                self.t1[i] = -0.8
+                ReadOutEvent.t1[i] = -0.8
             
-            if self.checkIfGoodData(i * 2 + 1):
-                bits = self.get2Bytes(12 + i * 6)
-                self.t2[i] = int(bits[3:], 2)
-            elif self.t2[i] < -1:
-                self.t2[i] = -0.8
+            if self.checkIfGoodData(i * 2 + 1, ReadOutEvent):
+                bits = self.get2Bytes(12 + i * 6, ReadOutEvent)
+                ReadOutEvent.t2[i] = int(bits[3:], 2)
+            elif ReadOutEvent.t2[i] < -1:
+                ReadOutEvent.t2[i] = -0.8
 
-    def timeTicksToNanoS(self):
-        self.t1[:] = [x*5/4.0 for x in self.t1]
-        self.t2[:] = [x*5/4.0 for x in self.t2]
+    def timeTicksToNanoS(self, ReadOutEvent):
+        ReadOutEvent.t1[:] = [x*5/4.0 for x in ReadOutEvent.t1]
+        ReadOutEvent.t2[:] = [x*5/4.0 for x in ReadOutEvent.t2]
 
-    def checkIfGoodReadout(self):
+    def checkIfGoodReadout(self, ReadOutEvent):
         for i in range(4):
-            if self.t1[i] >= 0:
-                if (self.t2[i] >= 0) and (self.t2[i] < self.t1[i]):
-                    self.t2[i] += 40
+            if ReadOutEvent.t1[i] >= 0:
+                if (ReadOutEvent.t2[i] >= 0) and (ReadOutEvent.t2[i] < ReadOutEvent.t1[i]):
+                    ReadOutEvent.t2[i] += 40
 
-    def updateEvents(self):
+    def updateEvents(self, ReadOutEvent):
         t = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-        t[0:4] = self.t1
-        t[4:8] = self.t2
-        t[8] = self.timeE
+        t[0:4] = ReadOutEvent.t1
+        print(t[0:4])
+        t[4:8] = ReadOutEvent.t2
+        t[8] = ReadOutEvent.timeE
         self.events.append(t)
 
-    def readLine(self):
-        if len(self.line) == 74:
-            if self.checkIfNewEvent():
-                self.timeE = time.time() - self.time0
-                self.new = True
-                self.timeTicksToNanoS()
-                self.checkIfGoodReadout()
-                self.updateEvents()
+    def process(self, ReadOutEvent):
+        ReadOutEvent.timeE = time.time() - ReadOutEvent.time0
+        self.new = True
+        self.timeTicksToNanoS(ReadOutEvent)
+        self.checkIfGoodReadout(ReadOutEvent)
+        self.updateEvents(ReadOutEvent)
         
-                self.t1[:] = [-5 for x in self.t1]
-                self.t2[:] = [-5 for x in self.t2]
-                self.getTimeTicks()
-		
+        self.t1[:] = [-5 for x in self.t1]
+        self.t2[:] = [-5 for x in self.t2]
+        self.getTimeTicks(ReadOutEvent)
+
+    def readLine(self, ReadOutEvent):
+        if len(ReadOutEvent.line) == 74:
+            print(ReadOutEvent.line)
+            if self.checkIfNewEvent(ReadOutEvent):
+                self.process(ReadOutEvent)	
             else:
                 self.new = False
-                self.getTimeTicks()
+                self.getTimeTicks(ReadOutEvent)
+                
+        elif len(ReadOutEvent.line) == 142:
+            line0 = ReadOutEvent.line
+            ReadOutEvent.line = line0[0:68]
+            if self.checkIfNewEvent(ReadOutEvent):
+                self.process(ReadOutEvent)		
+            else:
+                self.new = False
+                self.getTimeTicks(ReadOutEvent)
+                
+            ReadOutEvent.line = line0[68:]
+            if self.checkIfNewEvent(ReadOutEvent):
+                self.process(ReadOutEvent)		
+            else:
+                self.new = False
+                self.getTimeTicks(ReadOutEvent)
+        else:
+            print("line lenghth = " + str(len(self.line)) + " line " + self.line)
 
     def connectToSerial(self):
         os.chdir("/dev")
@@ -107,14 +138,25 @@ class ReadOut():
         
         while 1:
             self.ser.close
+            line0 = b''
             try:
-                self.line = self.ser.readline()
-                if self.line != b'':
-                    self.readLine()
+                #lines = self.ser.readlines()
+                #for line0 in lines:
+                    #self.line = line0
+                line0 = self.ser.readline()
             except:
                 print("USB disconected :( ")
                 self.connectToSerial()
                 time.sleep(5)
+                
+            ReadOutEvent = ReadOutEventC(line0)
+            if line0 != b'':
+                #print("thread")
+                self.thread = threading.Thread(target = self.readLine, args = (ReadOutEvent,))
+                self.thread.start()
+##                self.line = self.ser.readline()
+##                if self.line != b'':
+##                    self.readLine()
                 
     def getEvents(self):
         """Get recorded events and clear the list
@@ -127,3 +169,47 @@ class ReadOut():
         self.events = []
         return events0
             
+##class ReadOut00():
+##    def __init__(self):
+##        self.line = b''
+##        self.ser = 0
+##        
+##    def connectToSerial(self):
+##        os.chdir("/dev")
+##        for file in glob.glob("ttyUSB*"):
+##            print(file)
+##            try:
+##                self.ser = serial.Serial('/dev/' + str(file), baudrate = 115200, bytesize = 8, parity = 'N', stopbits = 1, xonxoff = True, timeout = 0)
+##                print("connected to " + str(file))
+##            except:
+##                print(str(file) + " checked")
+##
+##    def setDAQparameters(self):
+##        if (self.ser.writable()):
+##            self.ser.write(b'WC 0 F\r\n') #send signal to DAQ to read from 4 detectors
+##                                          #and corelarion 1                             
+##            self.ser.flush()
+##            
+##    def readLoop(self):
+##        """readout loop that should run in background"""
+##        self.connectToSerial()
+##        self.setDAQparameters()
+##        
+##        while 1:
+##            self.ser.close
+##            try:
+##                #lines = self.ser.readlines()
+##                #for line0 in lines:
+##                    #self.line = line0
+##                line0 = self.ser.readline()
+##                if line0 != b'':
+##                    ReadLine = ReadLine(line0)
+##                    self.thread = threading.Thread(target = ReadLine.readLine, args = line0)
+##                    self.thread.start()
+####                self.line = self.ser.readline()
+####                if self.line != b'':
+####                    self.readLine()
+##            except:
+##                print("USB disconected :( ")
+##                self.connectToSerial()
+##                time.sleep(5)       

@@ -7,7 +7,7 @@ class Constants:
         self.det_Y = self.cable_length/(2**(1/2)) * np.array([1.0, -1.0, -1.0, 1.0])
         #self.det_Z = [1, 1, 1, 1]
         self.det_area = 0.31 * 0.27
-        self.readOut_eff = 0.95
+        self.readOut_eff = 0.998
         self.det_eff = 0.75
         self.v_muon = 0.298 # 29.8 cm/ns from https://paulba.no/paper/Liu.pdf
 

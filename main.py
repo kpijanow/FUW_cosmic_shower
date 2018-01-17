@@ -19,9 +19,9 @@ threadLoop = threading.Thread(target = Analize.anaLoop)
 threadHourFlux = threading.Thread(target = Analize.PrintHourFlux)
 threadTotalFlux = threading.Thread(target = Analize.PrintTotalFlux)
 print("Thread init")
-threadLoop.start()
 threadHourFlux.start()
 threadTotalFlux.start()
+threadLoop.start()
 print("Threads started")
 
 #data needed for gui

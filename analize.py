@@ -6,7 +6,7 @@ compute flux (per minute, total)
 '''
 
 import constants 
-import readout
+import readout0
 import event
 import numpy as np
 import math as math
@@ -21,16 +21,17 @@ class Analize():
         self.flux_per_min = np.ones(60)
         self.muonsInMin = 0
         self.time = 0
-        self.ReadOut = readout.ReadOut()
+        self.ReadOut = readout0.ReadOut()
         self.thread = threading.Thread(target = self.ReadOut.readLoop)
         self.thread.start()
+        #self.ReadOut.readLoop()
         self.constants = constants.Constants()
         self.newMinute = False
         self.newHour = False
         self.flux_hour = []
         self.minutes = 0
         self.lastVector = []
-        self.lastDetectors
+        self.lastDetectors = []
     
     def anaLoop(self):
         while(1):
@@ -47,6 +48,7 @@ class Analize():
                 self.detectedMuons += evt.nMuons
                 self.UpdateFlux(evt)
                 sys.stdout.flush()
+            time.sleep(1)
                 
 
     def NewMinute(self):
@@ -77,7 +79,7 @@ class Analize():
 
     def TotalFlux(self):
         if self.time != 0:
-            return self.detectedMuons/(self.constants.det_area*(self.time)*self.constants.det_eff*self.constants.readOut_eff)
+            return self.detectedMuons #/(self.constants.det_area*(self.time)*self.constants.det_eff*self.constants.readOut_eff)
         else:
             return 0
 
