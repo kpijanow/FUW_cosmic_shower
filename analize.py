@@ -6,7 +6,7 @@ compute flux (per minute, total)
 '''
 
 import constants 
-import readout0
+import readout
 import event
 import numpy as np
 import math as math
@@ -21,7 +21,7 @@ class Analize():
         self.flux_per_min = np.ones(60)
         self.muonsInMin = 0
         self.time = 0
-        self.ReadOut = readout0.ReadOut()
+        self.ReadOut = readout.ReadOut()
         self.thread = threading.Thread(target = self.ReadOut.readLoop)
         self.thread.start()
         #self.ReadOut.readLoop()
