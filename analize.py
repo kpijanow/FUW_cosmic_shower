@@ -18,7 +18,7 @@ class Analize():
 
     def __init__(self):
         self.detectedMuons = 0
-        self.flux_per_min = np.ones(60)
+        self.flux_per_min = np.zeros(60)
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -65,7 +65,7 @@ class Analize():
     def UpdateFlux(self, evt):
         self.muonsInMin += evt.nMuons
         if self.newMinute:
-            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*1000*self.constants.det_eff*self.constants.readOut_eff))
+            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff))
             self.flux_per_min = self.flux_per_min[1:62]
             self.muonsInMin = 0
             self.newMinute = False
@@ -86,11 +86,11 @@ class Analize():
     def PrintHourFlux(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("h" + str(self.HourFlux()))
-        threading.Timer(3600, self.PrintHourFlux).start()
+        threading.Timer(60, self.PrintHourFlux).start()
 
     def PrintTotalFlux(self):
         # every hour update the total detected flux
         print("t" + str(self.TotalFlux()))
         print(time.ctime())
-        threading.Timer(3600, self.PrintTotalFlux).start()
+        threading.Timer(60, self.PrintTotalFlux).start()
     
