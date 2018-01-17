@@ -27,7 +27,7 @@ class Analize():
         #self.ReadOut.readLoop()
         self.constants = constants.Constants()
         self.newMinute = False
-        self.newHour = False
+##        self.newHour = False
         self.flux_hour = []
         self.minutes = 0
         self.lastVector = []
@@ -40,7 +40,7 @@ class Analize():
                 evt = event.Event(lines[i])
                 self.time = evt.time
                 self.newMinute = self.NewMinute()
-                self.newHour = self.NewHour()
+##                self.newHour = self.NewHour()
                 if evt.vector is not None:
                     print(evt.vector)
                     self.lastVector = evt.vector
@@ -58,14 +58,14 @@ class Analize():
         else:
             return self.newMinute
 
-    def NewHour(self):
-        if self.time % 3600:  return True  
-        else:               return False
+##    def NewHour(self):
+##        if self.time % 3600:  return True  
+##        else:               return False
                 
     def UpdateFlux(self, evt):
         self.muonsInMin += evt.nMuons
         if self.newMinute:
-            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(60*self.constants.det_area*self.constants.det_eff*self.constants.readOut_eff))
+            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*1000*self.constants.det_eff*self.constants.readOut_eff))
             self.flux_per_min = self.flux_per_min[1:62]
             self.muonsInMin = 0
             self.newMinute = False
@@ -79,7 +79,7 @@ class Analize():
 
     def TotalFlux(self):
         if self.time != 0:
-            return self.detectedMuons #/(self.constants.det_area*(self.time)*self.constants.det_eff*self.constants.readOut_eff)
+            return self.detectedMuons/(4*self.constants.det_area*10000*(self.time/60)*self.constants.det_eff*self.constants.readOut_eff)
         else:
             return 0
 
