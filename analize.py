@@ -19,6 +19,7 @@ class Analize():
     def __init__(self):
         self.detectedMuons = 0
         self.flux_per_min = np.zeros(60)
+        self.zenith_histo = np.zeros(20)
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -42,6 +43,12 @@ class Analize():
                 self.newMinute = self.NewMinute()
 ##                self.newHour = self.NewHour()
                 if evt.vector is not None:
+                    if evt.vector[0] != 0 and evt.vector[1] != 0:
+                        index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
+                        if index < 20:
+                            self.zenith_histo[index] += 1
+                    else:
+                        self.zenith_histo[0] += 1
                     print(evt.vector)
                     self.lastVector = evt.vector
                     self.lastDetectors = evt.detectorsFired
@@ -86,11 +93,16 @@ class Analize():
     def PrintHourFlux(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("h" + str(self.HourFlux()))
-        threading.Timer(60, self.PrintHourFlux).start()
+        threading.Timer(3600, self.PrintHourFlux).start()
+
+    def PrintZenith(self):
+        # every hour get list flux per min in previous hour -> then show average or whatever in a histo
+        print("z" + str(self.zenith_histo))
+        threading.Timer(3600, self.PrintZenith).start()
 
     def PrintTotalFlux(self):
         # every hour update the total detected flux
         print("t" + str(self.TotalFlux()))
         print(time.ctime())
-        threading.Timer(60, self.PrintTotalFlux).start()
+        threading.Timer(3600, self.PrintTotalFlux).start()
     

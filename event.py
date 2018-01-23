@@ -65,7 +65,7 @@ class Event():
                     vector = [0, 0, 1]   
                 #print(vector[0])
                 #print(vector[1])
-                if (vector[0]**2 - vector[1]**2) <= 1:
+                if (vector[0]**2 + vector[1]**2) < 1:
                     vector[2] = math.sqrt(1 - vector[0]**2 - vector[1]**2)
                 else:
                     vector = [0, 0, 1]
@@ -93,7 +93,7 @@ class Event():
                 else:
                     vectorTemp = [0, 0, 1]
                     
-                if (vectorTemp[0]**2 - vectorTemp[1]**2) <= 1:
+                if (vectorTemp[0]**2 + vectorTemp[1]**2) < 1:
                     vectorTemp[2] = math.sqrt(1 - vectorTemp[0]**2 - vectorTemp[1]**2)
                 else:
                     vectorTemp = [0, 0, 1]
