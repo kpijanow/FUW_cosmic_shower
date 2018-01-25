@@ -46,16 +46,16 @@ class Event():
         #self.t1[0] = self.t1.max()
         #self.t1[self.t1.argmax()] = temp
         if self.nMuons == 2:
-			self.detecotrsFired = self.t1 != -1
-			i = np.nonzero(self.t1 != -1)
+            self.detecotrsFired = self.t1 != -1
+            i = np.nonzero(self.t1 != -1)
             v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
-	              self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
-			vector = [0, 0, 0]
-			vector[2] = math.tan(math.asin(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1])))*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
-			vector[0] = v[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
-			vector[1] = v[1]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
-			vector[2] = vector[2]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
-			return vector
+	    self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
+            vector = [0, 0, 0]
+            vector[2] = math.tan(math.asin(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1])))*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
+            vector[0] = v1[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
+            vector[1] = v1[1]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
+            vector[2] = vector[2]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
+            return vector
 
         elif self.nMuons == 3:
             self.detecotrsFired = self.t1 != -1

@@ -82,13 +82,11 @@ def det_plot(recentShowerVector, recentShowerDetectors, ax):
 	
 
 	vec1 = VecV
-	vec2 = VecE
-
-	angle=np.arccos(np.dot(vec1,vec2)/(np.linalg.norm(vec1)*np.linalg.norm(vec2)))
+	vec2 = VecE	
 	
 	ax.set_zlim((1, -0.5))
 
-	return ax, angle
+	return ax
 
 
 

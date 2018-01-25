@@ -41,6 +41,7 @@ print(recentShowerDetectors)
 recentZenithHisto = Analize.zenith_histo
 print(type(recentZenithHisto))
 
+'''
 #gui test
 totalFlux = str(901.8)
 tableOfFluxInEveryMinute = np.zeros(60)+2
@@ -50,6 +51,8 @@ recentZenithHisto = np.zeros(20)+1
 
 #0, 90, 20 bin, 
 print(recentZenithHisto)
+'''
+
 print("GUI test")
 
 
@@ -60,8 +63,13 @@ a_txt = f2.add_subplot(gs[0,-1])
 a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
 ax_h = f2.add_subplot(gs[-1, -1])
 
-ani = animation.FuncAnimation(f2, animate, fargs = [tableOfFluxInEveryMinute], interval=5000)
+ani = animation.FuncAnimation(f2, animate, fargs = [tableOfFluxInEveryMinute, a], interval=5000)
 ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
 ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [recentShowerVector, recentShowerDetectors, a_sh], interval=50)#ani = animation.FuncAnimation(f2, animate, interval=1000)
 ani4 = animation.FuncAnimation(f2, flux_text, fargs = [str(totalFlux), a_txt], interval=1000)
+
+threadA = threading.Thread(target = ani3)
+threadA.start()
+
 plt.show()
+

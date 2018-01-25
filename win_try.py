@@ -19,41 +19,23 @@ from vec import det_plot
 
 
 
-def animate(i, tableOfFluxInEveryMinute):
+def animate(i, tableOfFluxInEveryMinute, a):
 
-	pullData = open('sampleText.txt','r').read()
-	dataArray = pullData.split('\n')
-	xar=[]
-	yar=[]
-
-	#Flux graph
-	#a = f2.add_subplot(gs[0,:-1])
+	xar=[]	
+	for x in range(0,60):
+                xar.append(x+i) 
 	
-	for eachLine in dataArray:
-		if len(eachLine)>1:
-			x,y = eachLine.split(',')
-			xar.append(int(x))
-			yar.append(int(y))
-
 	a.clear()
-	#a.plot(tableOfFluxInEveryMinute,yar[-200:])
-	print(i)
-
-	#What will happend without new data to read? 
-	t = threading.Thread(target=sim_one)
-	t.start()	
-
-	#return vec_t
+	a.plot(xar, tableOfFluxInEveryMinute)
 
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	
 	#a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
 	a_sh.clear()
-	#print(vec_t)
-	rot, angle = det_plot(vec_t,vec_d, a_sh)
+	print(vec_t)
+	rot = det_plot(vec_t,vec_d, a_sh)
 	rot.view_init(elev = 30, azim = i%360)
-	app.set_angle(angle)
 
 def animate_his(i, recentZenithHisto, ax_h):
 
