@@ -31,8 +31,8 @@ class Analize():
 ##        self.newHour = False
         self.flux_hour = []
         self.minutes = 0
-        self.lastVector = []
-        self.lastDetectors = []
+        self.lastVector = [0,0,0]
+        self.lastDetectors = [0,0,0,0]
     
     def anaLoop(self):
         while(1):
@@ -83,6 +83,9 @@ class Analize():
             
     def HourFlux(self):
         return self.flux_per_min
+
+    def ZenithHisto(self):
+        return self.zenith_histo
 
     def TotalFlux(self):
         if self.time != 0:
