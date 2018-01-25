@@ -34,6 +34,7 @@ class Analize():
         self.lastVector = []
         self.lastDetectors = []
 		self.showers = []
+		self.whichCoinc = [0, 0, 0, 0, 0, 0]
     
     def anaLoop(self):
         while(1):
@@ -50,14 +51,22 @@ class Analize():
                             self.zenith_histo[index] += 1
                     else:
                         self.zenith_histo[0] += 1
-                    print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
+                    #print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
                     self.lastVector = evt.vector
                     self.lastDetectors = evt.detectorsFired
 					self.showers[evt.nMuons] += 1
+					if(evt.nMuons == 2):
+						if(evt.detectorsFired[0] and evt.detectorsFired[1]): self.whichCoinc[0] += 1
+						elif(evt.detectorsFired[0] and evt.detectorsFired[2]): self.whichCoinc[1] += 1
+						elif(evt.detectorsFired[0] and evt.detectorsFired[3]): self.whichCoinc[2] += 1
+						elif(evt.detectorsFired[1] and evt.detectorsFired[2]): self.whichCoinc[3] += 1
+						elif(evt.detectorsFired[1] and evt.detectorsFired[3]): self.whichCoinc[4] += 1
+						elif(evt.detectorsFired[2] and evt.detectorsFired[3]): self.whichCoinc[5] += 1
+					print(str(evt.vector) + " coincidence = " + str(evt.nMuons) + " " + str(self.whichCoinc))
                 self.detectedMuons += evt.nMuons
                 self.UpdateFlux(evt)
                 sys.stdout.flush()
-            time.sleep(1)
+            time.sleep(2)
                 
 
     def NewMinute(self):

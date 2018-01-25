@@ -142,7 +142,7 @@ class ReadOut():
             #self.ser.close
             try:
                 #print("try " + str(self.ser.isOpen()) + "\n")
-                time.sleep(0.2)
+                time.sleep(0.3)
                 lines = self.ser.readlines()
                 
                 

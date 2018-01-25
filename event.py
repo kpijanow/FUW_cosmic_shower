@@ -51,7 +51,11 @@ class Event():
             v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
 	              self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
 			vector = [0, 0, 0]
-			vector[2] = math.tan(math.asin(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1])))*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
+			#if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
+			vector[2] = min(1, max(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]), -1))
+			vector[2] = math.asin(vector[2])
+			vector[2] = math.tan(vector[2])
+			vector[2] = vector[2]*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
 			vector[0] = v[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
 			vector[1] = v[1]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
 			vector[2] = vector[2]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])

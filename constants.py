@@ -3,8 +3,8 @@ import numpy as np
 class Constants:  
     def __init__(self):
         self.cable_length = 15
-        self.det_X = 10 * np.array([10.0, 10.0, 0.0, 0.0])
-        self.det_Y = 10 * np.array([3.0, 0.0,1.0, 0.0])
+        self.det_X =  np.array([10.0, 10.0, 0.0, 0.0])
+        self.det_Y =  np.array([3.0, 0.0,1.0, 0.0])
         
         #self.det_X = self.cable_length/(2**(1/2)) * np.array([1.0, 1.0, -1.0, -1.0])
         #self.det_Y = self.cable_length/(2**(1/2)) * np.array([1.0, -1.0, -1.0, 1.0])
