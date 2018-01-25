@@ -33,6 +33,7 @@ class Analize():
         self.minutes = 0
         self.lastVector = [0,0,0]
         self.lastDetectors = [0,0,0,0]
+	self.showers = []
     
     def anaLoop(self):
         while(1):
@@ -49,9 +50,10 @@ class Analize():
                             self.zenith_histo[index] += 1
                     else:
                         self.zenith_histo[0] += 1
-                    print(evt.vector)
+                    print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
                     self.lastVector = evt.vector
                     self.lastDetectors = evt.detectorsFired
+					self.showers[evt.nMuons] += 1
                 self.detectedMuons += evt.nMuons
                 self.UpdateFlux(evt)
                 sys.stdout.flush()
@@ -101,6 +103,7 @@ class Analize():
     def PrintZenith(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("z" + str(self.zenith_histo))
+		print("s" + str(self.showers))
         threading.Timer(3600, self.PrintZenith).start()
 
     def PrintTotalFlux(self):
