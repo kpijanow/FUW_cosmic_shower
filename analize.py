@@ -57,12 +57,13 @@ class Analize():
                     if evt.radius >= self.rad_bins[i-1] and evt.radius<self.rad_bins[i]:
                         self.rad_histo[i-1] += 1
                 if evt.vector is not None:
-                    if evt.vector[0] != 0 and evt.vector[1] != 0:
-                        index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
-                        for i in range(1,8):
-                            if index >= self.zenithbins[i-1] and index >= self.zenithbins[i]:    self.zenith_histo[i-1] += 1
-                    else:
-                        self.zenith_histo[0] += 1
+                    if evt.vector[2] != 0:
+                        if evt.vector[0] != 0 and evt.vector[1] != 0:
+                            index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
+                            for i in range(1,8):
+                                if index >= self.zenithbins[i-1] and index >= self.zenithbins[i]:    self.zenith_histo[i-1] += 1
+                        else:
+                            self.zenith_histo[0] += 1
                     
                     #print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
                     self.lastVector = evt.vector
