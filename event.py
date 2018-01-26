@@ -25,9 +25,9 @@ class Event():
 ##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
         self.detectorsFired = [0, 0, 0, 0]
         self.nMuons = self.coincidence()
+        self.radius = self.getRadius()
         #self.vector = None
         self.vector = self.getDirection()
-        self.radius = self.getRadius()
         
     def coincidence(self):
         n = 0

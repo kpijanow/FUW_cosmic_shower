@@ -37,7 +37,7 @@ class Analize():
         self.whichCoinc = [0, 0, 0, 0, 0, 0]
         self.zenithbins = [0, 10, 20, 30, 40, 60, 80, 100]
         self.rad_histo = np.zeros(6)
-        self.rad_bins = [0, 2, 3, 5, 6, 9, 11]
+        self.rad_bins = [0, 2, 3, 4, 5, 6, 9]
         self.det_histo = np.zeros(4)
     
     def anaLoop(self):
@@ -51,19 +51,20 @@ class Analize():
                 self.newMinute = self.NewMinute()
 ##                self.newHour = self.NewHour()
                 for i in range(4):
-                    if evt.detecotrsFired[i]:
+                    if evt.detectorsFired[i]:
                         self.det_histo[i] += 1
-                for i in range(1,7):
-                    if evt.radius >= self.rad_bins[i-1] and evt.radius<self.rad_bins[i]:
-                        self.rad_histo[i-1] += 1
                 if evt.vector is not None:
+                    for i in range(1,7):
+                        if evt.radius > self.rad_bins[i-1] and evt.radius<=self.rad_bins[i]:
+                            self.rad_histo[i-1] += 1
                     if evt.vector[2] != 0:
                         if evt.vector[0] != 0 and evt.vector[1] != 0:
                             index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
                             for i in range(1,8):
-                                if index >= self.zenithbins[i-1] and index >= self.zenithbins[i]:    self.zenith_histo[i-1] += 1
+                                if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
                         else:
                             self.zenith_histo[0] += 1
+##                            print ("else")
                     
                     #print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
                     self.lastVector = evt.vector
@@ -110,7 +111,8 @@ class Analize():
         
             
     def HourFlux(self):
-        return self.flux_per_min
+        x = self.flux_per_min
+        return x
 
     def ZenithHisto(self):
         return self.zenith_histo

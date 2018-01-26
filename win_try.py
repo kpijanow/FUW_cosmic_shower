@@ -13,17 +13,29 @@ from vec import det_plot
 
 
 
-def animate(i, tableOfFluxInEveryMinute, a):
+def animate(i, q_min, a, a_txt, ax_h):
+        
+        xar=[]
+        tableOfFluxInEveryMinute=q_min.get()
+        for x in range(0,60):
+                xar.append(x+i)
 
-	xar=[]
-	#tableOfFluxInEveryMinute=q_min.get()
-	for x in range(0,60):
-                xar.append(x+i) 
-	
-	a.clear()
-	print(tableOfFluxInEveryMinute)
-	a.plot(xar, tableOfFluxInEveryMinute)
-
+        a.clear()
+        print(tableOfFluxInEveryMinute)
+        a.plot(xar, tableOfFluxInEveryMinute)
+        txt=round(q_min.get(),4)
+        a_txt.clear()
+        a_txt.axis('off')
+        a_txt.text(0.7,1, "QNet", horizontalalignment='right',
+        verticalalignment='top', fontsize = 60,
+        transform=a_txt.transAxes)
+        a_txt.text(0.7,0.5, txt, horizontalalignment='right',
+        verticalalignment='top', fontsize = 40,
+        transform=a_txt.transAxes)
+        recentZenithHisto=q_min.get()
+        ax_h.clear()
+        ind = np.arange(len(recentZenithHisto))
+        ax_h.bar(ind, recentZenithHisto, color='orange')
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	
