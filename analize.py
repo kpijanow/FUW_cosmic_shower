@@ -55,7 +55,7 @@ class Analize():
                         self.det_histo[i] += 1
                 for i in range(1,7):
                     if evt.radius >= self.rad_bins[i-1] and evt.radius<self.rad_bins[i]:
-                        sef.rad_histo[i-1] += 1
+                        self.rad_histo[i-1] += 1
                 if evt.vector is not None:
                     if evt.vector[0] != 0 and evt.vector[1] != 0:
                         index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
