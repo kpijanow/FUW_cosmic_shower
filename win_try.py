@@ -14,6 +14,7 @@ from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+#from queue impoprt Queue
 
 from vec import det_plot
 
@@ -32,7 +33,8 @@ def animate(i, tableOfFluxInEveryMinute, a):
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	
 	#a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
-	a_sh.clear()
+        plt.pause(0.1)
+	a_sh.clear()	
 	print(vec_t)
 	rot = det_plot(vec_t,vec_d, a_sh)
 	rot.view_init(elev = 30, azim = i%360)
@@ -104,10 +106,8 @@ f2 = plt.figure()
 gs = gridspec.GridSpec(3,3)
 ani = animation.FuncAnimation(f2, animate, interval=1000)
 ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [vec_t, vec_d], interval=50)
-ani4 = animation.FuncAnimation(f2, flux_text, fargs = [txt], interval=1000)
+#ani4 = animation.FuncAnimation(f2, flux_text, fargs = [txt], interval=1000)
 ani2 = animation.FuncAnimation(f2, animate_his, interval=1000)
 plt.show()
 #app.mainloop()
 '''
-
-

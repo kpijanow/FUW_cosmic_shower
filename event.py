@@ -23,19 +23,21 @@ class Event():
         self.t2 = np.array(line[4:8])
         self.time = line[8]        
 ##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
+        self.detectorsFired = [0, 0, 0, 0]
         self.nMuons = self.coincidence()
         #self.vector = None
         self.vector = self.getDirection()
-        self.detectorsFired = []
         
-    
-
     def coincidence(self):
         n = 0
         for i in range(4):
-            if self.t1[i] and self.t1[i]!=-1:
-                n+=1
+            
+            if self.t1[i]!=-1:
+                self.detectorsFired[i] = 1
+            else:
+                self.detectorsFired[i] = 0
 ##        return n
+##        self.detectorsFired = (self.t1 != -1)
         return np.sum(self.t1 != -1) #if we are using only t1 than coincidence should be nr of
                                      #times that t1 was read properly
 ##                                        but this doesn't sum how we want it 
@@ -48,10 +50,13 @@ class Event():
         if self.nMuons == 2:
             self.detecotrsFired = self.t1 != -1
             i = np.nonzero(self.t1 != -1)
-            v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]],
-	    self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
+            v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]], self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
             vector = [0, 0, 0]
-            vector[2] = math.tan(math.asin(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1])))*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
+			#if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
+            vector[2] = min(1, max(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]), -1))
+            vector[2] = math.asin(vector[2])
+            vector[2] = math.tan(vector[2])
+            vector[2] = vector[2]*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
             vector[0] = v1[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
             vector[1] = v1[1]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
             vector[2] = vector[2]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
