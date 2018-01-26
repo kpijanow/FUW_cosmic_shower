@@ -10,9 +10,15 @@ import analize
 import threading
 import time
 import numpy as np
+import tkinter as tk
+
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 
 from win_try import *
 from queue import Queue
+from matplotlib.figure import Figure
 
 print("START")
 Analize = analize.Analize()
@@ -32,15 +38,11 @@ print("Threads started")
 
 #data needed for gui
 tableOfFluxInEveryMinute = Analize.flux_per_min #flux 
-print(tableOfFluxInEveryMinute)
 totalFlux = Analize.TotalFlux() #txt
-print(totalFlux)
 recentShowerVector = Analize.lastVector #vec_t
-print(recentShowerVector)
 recentShowerDetectors = Analize.lastDetectors #vec_d
-print(recentShowerDetectors)
 recentZenithHisto = Analize.zenith_histo
-print(type(recentZenithHisto))
+
 
 #gui test
 totalFlux = str(901.8)
@@ -56,31 +58,69 @@ print(recentZenithHisto)
 print("GUI test")
 
 time.sleep(1)
-print(Analize.TotalFlux())
 
-f2 = plt.figure()
+
+q = Queue()
+q_min = Queue()
+
+def TFin(out_q):
+    while True:
+        time.sleep(1)
+
+        out_q.put(Analize.TotalFlux())
+
+threadTF = threading.Thread(target = TFin, args =(q,))
+threadTF.start()
+
+
+
+def TFMinIn(out_q):
+    while True:
+        time.sleep(1)
+        #print(Analize.flux_per_min)
+        print("works...")
+        out_q.put(Analize.flux_per_min)
+
+threadTFMin = threading.Thread(target = TFMinIn, args =(q_min,))
+threadTFMin.start() 
+
 #plt.ion()
 
+time.sleep(1)
+
+
+
+
+
+#box = tk.Entry(app)
+#button = tk.Button(app, text="check", command=self.plot)
+#fr = tk.Frame()
+app = tk.Tk()
+f2 = plt.figure()
 gs = gridspec.GridSpec(3,3)
 a = f2.add_subplot(gs[0,:-1])
 a_txt = f2.add_subplot(gs[0,-1])
 a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
 ax_h = f2.add_subplot(gs[-1, -1])
-print("GUI test2")
-time.sleep(1)
-print(Analize.TotalFlux())
-#ani = animation.FuncAnimation(f2, animate, fargs = [tableOfFluxInEveryMinute, a], interval=5000)
-time.sleep(1)
+plt.ion()
 
 
-print(Analize.TotalFlux())
-time.sleep(1)
+
+canvas = FigureCanvasTkAgg(f2, master = app)
+canvas.show()
+
+canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+toolbar = NavigationToolbar2TkAgg(canvas, app)
+toolbar.update()
+canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)   
+
+
+
+ani = animation.FuncAnimation(f2, animate, fargs = [Analize.flux_per_min, a], interval=10000)
 #ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
-ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh], interval=1000)
-#ani4 = animation.FuncAnimation(f2, flux_text, fargs = [str(totalFlux), a_txt], interval=1000)
-print("Before", Analize.TotalFlux())
-#plt.draw()
-#plt.pause(0.1)
-#plt.show(block = False)
-plt.show()
+#ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
+ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)
 
+
+plt.draw()
+app.mainloop()
