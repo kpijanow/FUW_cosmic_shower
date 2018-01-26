@@ -27,6 +27,7 @@ class Event():
         self.nMuons = self.coincidence()
         #self.vector = None
         self.vector = self.getDirection()
+        self.radius = self.getRadius()
         
     def coincidence(self):
         n = 0
@@ -41,16 +42,25 @@ class Event():
         return np.sum(self.t1 != -1) #if we are using only t1 than coincidence should be nr of
                                      #times that t1 was read properly
 ##                                        but this doesn't sum how we want it 
-
+    def getRadius(self):
+        if self.nMuons >= 2:
+            self.detecotrsFired = self.t1 != -1
+            i = np.nonzero(self.t1 != -1)
+            dx = []
+            for j in range(self.nMuons):
+                for k in range(self.nMuons):
+                dx.append(self.const.det_X[i[0][j]] - self.const.det_X[i[0][k]])
+            return max(dx)
+        else: return 0
 
     def getDirection(self):
         #temp = self.t1[0]
         #self.t1[0] = self.t1.max()
         #self.t1[self.t1.argmax()] = temp
-        if self.nMuons == 2:
-            self.detecotrsFired = self.t1 != -1
-            i = np.nonzero(self.t1 != -1)
-            v1 = [self.const.det_X[i[0][1]] - self.const.det_X[i[0][0]], self.const.det_Y[i[0][1]] - self.const.det_Y[i[0][0]] ]
+        if self.nMuons >= 2:
+            
+            v1 = [self.radius, 0]
+            radius = max(dx)
             vector = [0, 0, 0]
 			#if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
             vector[2] = min(1, max(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]), -1))
@@ -60,7 +70,7 @@ class Event():
             vector[0] = v1[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
             vector[1] = v1[1]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
             vector[2] = vector[2]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
-            return vector
+            return vector, radius
 
         elif self.nMuons == 3:
             self.detecotrsFired = self.t1 != -1

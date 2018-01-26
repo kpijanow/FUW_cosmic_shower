@@ -19,7 +19,7 @@ class Analize():
     def __init__(self):
         self.detectedMuons = 0
         self.flux_per_min = np.zeros(60)
-        self.zenith_histo = np.zeros(20)
+        self.zenith_histo = np.zeros(7)
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -35,6 +35,10 @@ class Analize():
         self.lastDetectors = [0,0,0,0]
         self.showers = [0, 0, 0, 0]
         self.whichCoinc = [0, 0, 0, 0, 0, 0]
+        self.zenithbins = [0, 10, 20, 30, 40, 60, 80, 100]
+        self.rad_histo = np.zeros(6)
+        self.rad_bins = [0, 2, 3, 5, 6, 9, 11]
+        self.det_histo = np.zeros(4)
     
     def anaLoop(self):
         while(1):
@@ -46,13 +50,20 @@ class Analize():
                 self.time = evt.time
                 self.newMinute = self.NewMinute()
 ##                self.newHour = self.NewHour()
+                for i in range(4):
+                    if evt.detecotrsFired[i]:
+                        self.det_histo[i] += 1
+                for i in range(1,7):
+                    if evt.radius >= self.rad_bins[i-1] and evt.radius<self.rad_bins[i]:
+                        sef.rad_histo[i-1] += 1
                 if evt.vector is not None:
                     if evt.vector[0] != 0 and evt.vector[1] != 0:
                         index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
-                        if index < 20:
-                            self.zenith_histo[index] += 1
+                        for i in range(1,8):
+                            if index >= self.zenithbins[i-1] and index >= self.zenithbins[i]:    self.zenith_histo[i-1] += 1
                     else:
                         self.zenith_histo[0] += 1
+                    
                     #print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
                     self.lastVector = evt.vector
                     self.lastDetectors = evt.detectorsFired
@@ -79,6 +90,8 @@ class Analize():
         else:
             return self.newMinute
 
+
+    
 ##    def NewHour(self):
 ##        if self.time % 3600:  return True  
 ##        else:               return False
@@ -100,6 +113,12 @@ class Analize():
 
     def ZenithHisto(self):
         return self.zenith_histo
+        
+    def RadiusHisto(self):
+        return self.rad_histo
+    
+    def DetHitHisto(self):
+        return self.det_histo
 
     def TotalFlux(self):
         if self.time != 0:
@@ -114,8 +133,10 @@ class Analize():
 
     def PrintZenith(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
-        print("z" + str(self.zenith_histo))
-        print("s" + str(self.showers))
+        print("zenith" + str(self.zenith_histo))
+        print("showers" + str(self.showers))
+        print("det hits" + str(self.det_histo))
+        print("radius" + str(self.rad_histo))
         threading.Timer(3600, self.PrintZenith).start()
 
     def PrintTotalFlux(self):
