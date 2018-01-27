@@ -7,12 +7,8 @@ for coincidence > 2: direction of incoming cosmic shower
 """
 
 import constants 
-import readout
-import analize
 import numpy as np
 import math as math
-import threading
-import time
 
 
 class Event():
@@ -30,9 +26,7 @@ class Event():
         self.vector = self.getDirection()
         
     def coincidence(self):
-        n = 0
         for i in range(4):
-            
             if self.t1[i]!=-1:
                 self.detectorsFired[i] = 1
             else:
