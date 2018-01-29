@@ -184,7 +184,7 @@ class Analize():
         
             
     def HourFlux(self):
-        x = self.flux_per_min
+        x = self.flux_per_10min
         return x
 
     def ZenithHisto(self):
