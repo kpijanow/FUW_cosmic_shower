@@ -131,7 +131,8 @@ class Analize():
         #histogram of zenith angle
         if self.evt.vector[2] != 0:
             if self.evt.vector[0] != 0 and self.evt.vector[1] != 0:
-                index = int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180)
+                index = self.evt.zenith
+#                index = int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180)
                 for i in range(1,8):
                     if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
 

@@ -24,6 +24,7 @@ class Event():
         self.radius = self.getRadius()
         #self.vector = None
         self.vector = self.getDirection()
+        self.zenith = self.getZenith()
         
     def coincidence(self):
         for i in range(4):
@@ -35,7 +36,6 @@ class Event():
 ##        self.detectorsFired = (self.t1 != -1)
         return np.sum(self.t1 != -1) #if we are using only t1 than coincidence should be nr of
                                      #times that t1 was read properly
-##                                        but this doesn't sum how we want it 
     def getRadius(self):
         if self.nMuons >= 2:
             self.detecotrsFired = self.t1 != -1
@@ -47,6 +47,24 @@ class Event():
             return max(dx)
         else: return 0
 
+    def getZenith(self):
+        #temp = self.t1[0]
+        #self.t1[0] = self.t1.max()
+        #self.t1[self.t1.argmax()] = temp
+        if self.nMuons >= 2:
+            self.detecotrsFired = self.t1 != -1
+            i = np.nonzero(self.t1 != -1)
+            
+            v1 = [self.radius, 0]
+            vector = [0, 0, 0]
+			#if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
+            vector[2] = min(1, max(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]), -1))
+            vector[2] = math.asin(vector[2])
+            zenith = math.degrees(vector[2])
+            return zenith
+        else: return 0
+    
+    
     def getDirection(self):
         #temp = self.t1[0]
         #self.t1[0] = self.t1.max()
@@ -60,6 +78,7 @@ class Event():
 			#if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
             vector[2] = min(1, max(self.const.v_muon * abs(self.t1[i[0][1]] - self.t1[i[0][0]])/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]), -1))
             vector[2] = math.asin(vector[2])
+            self.zenith = math.degrees(vector[2])
             vector[2] = math.tan(vector[2])
             vector[2] = vector[2]*(math.sqrt(v1[0]*v1[0] + v1[1]*v1[1]))
             vector[0] = v1[0]/math.sqrt(v1[0]*v1[0] + v1[1]*v1[1] + vector[2]*vector[2])
