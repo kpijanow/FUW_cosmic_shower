@@ -27,7 +27,7 @@ class Analize():
 
     def __init__(self):
         self.detectedMuons = 0
-        self.flux_per_min = np.zeros(60)
+        self.flux_per_min = np.zeros(120)
         self.zenith_histo = np.zeros(7)
         self.muonsInMin = 0
         self.time = 0
@@ -50,18 +50,40 @@ class Analize():
         self.det_histo = np.zeros(4)
         self.evt = 0
         
-        self.q = Queue(maxsize = 3)
+        self.q = Queue(maxsize = 8)
+        
+        self.timeInterv = 720 #sec
+        self.timeBin = 120
     
     def anaLoop(self):
+        self.q.put_nowait(self.flux_per_min)
+        self.q.task_done()
+        self.q.put_nowait(self.TotalFlux())
+        self.q.task_done()
+        self.q.put_nowait(self.zenith_histo)
+        self.q.task_done()
+        self.q.put_nowait(self.rad_histo)
+        self.q.task_done()
+        self.q.put_nowait(self.flux_per_min)
+        self.q.task_done()
+        self.q.put_nowait(self.TotalFlux())
+        self.q.task_done()
+        self.q.put_nowait(self.zenith_histo)
+        self.q.task_done()
+        self.q.put_nowait(self.rad_histo)
+        self.q.task_done()
         while(1):
             lines = self.ReadOut.getEvents()
+##            print("\nn = " + str(len(lines)) + " time = " + str(self.time) )
             for i in range(len(lines)):
                 self.evt = event.Event(lines[i])                
                 self.time = self.evt.time
                 self.newMinute = self.NewMinute()
                 self.DetectorsFired()
+                self.detectedMuons += self.evt.nMuons
+                self.UpdateFlux()
                         
-                if self.evt.vector is not None:
+                if self.evt.vector is None:
                     continue
                 
                 self.ShowerRadious()
@@ -72,15 +94,23 @@ class Analize():
                 
                 self.lastVector = self.evt.vector
                 self.lastDetectors = self.evt.detectorsFired
-                
-                self.detectedMuons += self.evt.nMuons
-                self.UpdateFlux()
                 sys.stdout.flush()
+
+            time.sleep(0.5)
+            if self.q.full() == True:
+                self.q.get_nowait()
+                self.q.get_nowait()
+                self.q.get_nowait()
+                self.q.get_nowait()
                 
-                self.q.put(self.flux_per_min)
-                self.q.put(self.TotalFlux())
-                self.q.put(self.zenith_histo)
-            time.sleep(0.2)
+            self.q.put_nowait(self.flux_per_min)
+            self.q.task_done()
+            self.q.put_nowait(self.TotalFlux())
+            self.q.task_done()
+            self.q.put_nowait(self.zenith_histo)
+            self.q.task_done()
+            self.q.put_nowait(self.rad_histo)
+            self.q.task_done()
             
             
     def InitializeWindow(self):
@@ -129,13 +159,14 @@ class Analize():
     def ZenithAngle(self):
         #histogram of zenith angle
         if self.evt.vector[2] != 0:
-            if self.evt.vector[0] != 0 and self.evt.vector[1] != 0:
-                index = int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180*20/90)
+            if self.evt.vector[0] != 0 and self.evt.vector[0] != 1:
+                index = self.evt.zenith
+##                print("ZENITYHHHHHHH :" + str(self.evt.zenith))
+##                print(str(int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180)))
+##                index = math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180
                 for i in range(1,8):
                     if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
-            else:
-                self.zenith_histo[0] += 1
-        ##                            print ("else")
+
                    
     def DetectorCoincidence(self):      
         #histogram of detectors coincidence
@@ -148,8 +179,8 @@ class Analize():
             elif(self.evt.detectorsFired[2] == 1 and self.evt.detectorsFired[3] == 1): self.whichCoinc[5] += 1
                     
     def NewMinute(self):
-        if int(self.time / 60) != self.minutes and self.newMinute == False:
-            self.minutes = int(self.time / 60)
+        if int(self.time / self.timeInterv) != self.minutes and self.newMinute == False:
+            self.minutes = int(self.time / self.timeInterv)
             return True 
         else:
             return self.newMinute
@@ -163,8 +194,8 @@ class Analize():
     def UpdateFlux(self):
         self.muonsInMin += self.evt.nMuons
         if self.newMinute:
-            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff))
-            self.flux_per_min = self.flux_per_min[1:62]
+            self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*(self.timeInterv/60)*self.constants.det_eff*self.constants.readOut_eff))
+            self.flux_per_min = self.flux_per_min[1:self.timeBin + 2]
             self.muonsInMin = 0
             self.newMinute = False
         #if self.newHour:
@@ -198,10 +229,13 @@ class Analize():
 
     def PrintZenith(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
+        print("h" + str(self.HourFlux()))
         print("zenith" + str(self.zenith_histo))
         print("showers" + str(self.showers))
         print("det hits" + str(self.det_histo))
         print("radius" + str(self.rad_histo))
+        print("t" + str(self.TotalFlux()))
+        print(time.ctime())
         threading.Timer(3600, self.PrintZenith).start()
 
     def PrintTotalFlux(self):

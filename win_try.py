@@ -10,20 +10,45 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from vec import det_plot
+import time
+import datetime
+import matplotlib.dates as mdates
 
 
 
-def animate(i, q_min, a, a_txt, ax_h):
-        
+def animate(i, q_min, a, a_txt, ax_h, a_r):
+##        print("IN ANIMATE")
         xar=[]
-        tableOfFluxInEveryMinute=q_min.get()
-        for x in range(0,60):
-                xar.append(x+i)
 
+        while(q_min.full() != True):
+                return
+                time.sleep(0.0001)
+##        if q_min.unfinished_tasks():
+##                print("UNFINISHED")
+##                return
+        
+        tableOfFluxInEveryMinute=q_min.get_nowait()
+        txt=round(q_min.get_nowait(),4)
+        recentZenithHisto=q_min.get_nowait()
+        recentRadiousHisto = q_min.get_nowait()
+
+        timeBin = 120
+                
+        if len(tableOfFluxInEveryMinute) != timeBin:
+##                print("not 60: " + str(tableOfFluxInEveryMinute))
+                time.sleep(2)
+                return
+
+        localtime = time.localtime(time.time())
+        minuteS = 24 * 60 / timeBin
+        xar = [datetime.datetime.now() + datetime.timedelta(minutes=minuteS) * i for i in range(timeBin)]
+
+        myFmt = mdates.DateFormatter('%H:%M')
+        a.xaxis.set_major_formatter(myFmt)
         a.clear()
-        print(tableOfFluxInEveryMinute)
+        #print(tableOfFluxInEveryMinute)
         a.plot(xar, tableOfFluxInEveryMinute)
-        txt=round(q_min.get(),4)
+        #a.autofmt_xdate()
         a_txt.clear()
         a_txt.axis('off')
         a_txt.text(0.7,1, "QNet", horizontalalignment='right',
@@ -32,10 +57,14 @@ def animate(i, q_min, a, a_txt, ax_h):
         a_txt.text(0.7,0.5, txt, horizontalalignment='right',
         verticalalignment='top', fontsize = 40,
         transform=a_txt.transAxes)
-        recentZenithHisto=q_min.get()
         ax_h.clear()
-        ind = np.arange(len(recentZenithHisto))
+        #ind = np.arange(len(recentZenithHisto))
+        ind = ["0", "10", "20", "30", "40", "60", "80"]
         ax_h.bar(ind, recentZenithHisto, color='orange')
+        a_r.clear()
+        indR = [2, 3, 4, 5, 6, 9]
+        a_r.bar(indR, recentRadiousHisto, color='red')
+##        print("OUT OF ANIMATE")
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	

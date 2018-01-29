@@ -25,7 +25,10 @@ class ReadOut():
 
     
     def get2Bytes(self, n):
-        return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
+        try:
+            return bin(int(self.line[n:n+2].decode("utf8"), 16))[2:].zfill(8)
+        except:
+            return 0
 
     def checkIfNewEvent(self):
         bits = self.get2Bytes(9)
