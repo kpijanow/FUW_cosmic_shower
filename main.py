@@ -20,8 +20,12 @@ from matplotlib.figure import Figure
 Analize = analize.Analize()
 threadLoop = threading.Thread(target = Analize.anaLoop)
 threadLoop.start()
+print("loop started")
+threadLoop = threading.Thread(target = Analize.PrintHourFlux)
+threadLoop.start()
+print("print started")
 Analize.InitializeWindow()
-
+print("window initialized")
 
 #time.sleep(1)
 #

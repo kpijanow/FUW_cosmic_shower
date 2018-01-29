@@ -58,10 +58,15 @@ class Analize():
             for i in range(len(lines)):
                 self.evt = event.Event(lines[i])                
                 self.time = self.evt.time
+                print("time = " + str(self.time) + " minutes = " + str(self.minutes))
                 self.newMinute = self.NewMinute()
                 self.DetectorsFired()
+                self.detectedMuons += self.evt.nMuons
+                self.UpdateFlux()
+                
+                sys.stdout.flush()
                         
-                if self.evt.vector is not None:
+                if self.evt.vector is None:
                     continue
                 
                 self.ShowerRadious()
@@ -69,17 +74,13 @@ class Analize():
                 self.showers[self.evt.nMuons - 1] += 1
                 self.DetectorCoincidence()
                 print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
-                
+                self.q.put(self.flux_per_min)
+                print(self.flux_per_min)
+                self.q.put(self.TotalFlux())
+                self.q.put(self.zenith_histo)
                 self.lastVector = self.evt.vector
                 self.lastDetectors = self.evt.detectorsFired
                 
-                self.detectedMuons += self.evt.nMuons
-                self.UpdateFlux()
-                sys.stdout.flush()
-                
-                self.q.put(self.flux_per_min)
-                self.q.put(self.TotalFlux())
-                self.q.put(self.zenith_histo)
             time.sleep(0.2)
             
             
@@ -91,28 +92,23 @@ class Analize():
         a_txt = f2.add_subplot(gs[0,-1])
         a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
         ax_h = f2.add_subplot(gs[-1, -1])
-        plt.ion()
-        
-        
+        #plt.ion()
         
         canvas = FigureCanvasTkAgg(f2, master = app)
         canvas.show()
-        
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
         toolbar = NavigationToolbar2TkAgg(canvas, app)
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)   
-        
-        
-        
-        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h], interval=1000)
+        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h, ], interval = 10000)
         #ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
         #ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
         ##ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)
         
-        
         plt.draw()
+        print("plt.draw()")
         app.mainloop()
+        print("app.mainloop()")
         
     def DetectorsFired(self):
         #histograms of detectors fired
@@ -162,6 +158,7 @@ class Analize():
                 
     def UpdateFlux(self):
         self.muonsInMin += self.evt.nMuons
+        print(self.muonsInMin)
         if self.newMinute:
             self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff))
             self.flux_per_min = self.flux_per_min[1:62]
@@ -194,7 +191,12 @@ class Analize():
     def PrintHourFlux(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("h" + str(self.HourFlux()))
-        threading.Timer(3600, self.PrintHourFlux).start()
+        print("zenith" + str(self.zenith_histo))
+        print("showers" + str(self.showers))
+        print("det hits" + str(self.det_histo))
+        print("radius" + str(self.rad_histo))
+        print("t" + str(self.TotalFlux()))
+        threading.Timer(60, self.PrintHourFlux).start()
 
     def PrintZenith(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo

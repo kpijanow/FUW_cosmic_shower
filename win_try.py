@@ -12,9 +12,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from vec import det_plot
 
 
-
 def animate(i, q_min, a, a_txt, ax_h):
-        
+        print("IN ANIMATE")
         xar=[]
         tableOfFluxInEveryMinute=q_min.get()
         for x in range(0,60):
@@ -36,6 +35,7 @@ def animate(i, q_min, a, a_txt, ax_h):
         ax_h.clear()
         ind = np.arange(len(recentZenithHisto))
         ax_h.bar(ind, recentZenithHisto, color='orange')
+        print("OUT ANIMATE")
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	
