@@ -14,6 +14,15 @@ import threading
 import time
 import sys
 
+
+import tkinter as tk
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+from win_try import *
+from queue import Queue
+from matplotlib.figure import Figure
+
 class Analize():
 
     def __init__(self):
@@ -39,52 +48,105 @@ class Analize():
         self.rad_histo = np.zeros(6)
         self.rad_bins = [0, 2, 3, 4, 5, 6, 9]
         self.det_histo = np.zeros(4)
+        self.evt = 0
+        
+        self.q = Queue(maxsize = 3)
     
     def anaLoop(self):
         while(1):
             lines = self.ReadOut.getEvents()
             for i in range(len(lines)):
-                evt = event.Event(lines[i])
-                #print("TEST")
-                
-                self.time = evt.time
+                self.evt = event.Event(lines[i])                
+                self.time = self.evt.time
                 self.newMinute = self.NewMinute()
-##                self.newHour = self.NewHour()
-                for i in range(4):
-                    if evt.detectorsFired[i]:
-                        self.det_histo[i] += 1
-                if evt.vector is not None:
-                    for i in range(1,7):
-                        if evt.radius > self.rad_bins[i-1] and evt.radius<=self.rad_bins[i]:
-                            self.rad_histo[i-1] += 1
-                    if evt.vector[2] != 0:
-                        if evt.vector[0] != 0 and evt.vector[1] != 0:
-                            index = int(math.atan(math.sqrt(evt.vector[0] * evt.vector[0] + evt.vector[1] * evt.vector[1])/evt.vector[2])/3.14*180*20/90)
-                            for i in range(1,8):
-                                if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
-                        else:
-                            self.zenith_histo[0] += 1
-##                            print ("else")
-                    
-                    #print(str(evt.vector) + " coincidence = " + str(evt.nMuons))
-                    self.lastVector = evt.vector
-                    self.lastDetectors = evt.detectorsFired
-                    self.showers[evt.nMuons - 1] += 1
-                    if(evt.nMuons == 2):
-                        if(evt.detectorsFired[0] == 1 and evt.detectorsFired[1] == 1): self.whichCoinc[0] += 1
-                        elif(evt.detectorsFired[0] == 1 and evt.detectorsFired[2] == 1): self.whichCoinc[1] += 1
-                        elif(evt.detectorsFired[0] == 1 and evt.detectorsFired[3] == 1): self.whichCoinc[2] += 1
-                        elif(evt.detectorsFired[1] == 1 and evt.detectorsFired[2] == 1): self.whichCoinc[3] += 1
-                        elif(evt.detectorsFired[1] == 1 and evt.detectorsFired[3] == 1): self.whichCoinc[4] += 1
-                        elif(evt.detectorsFired[2] == 1 and evt.detectorsFired[3] == 1): self.whichCoinc[5] += 1
-                    print(str(evt.vector) + " coincidence = " + str(evt.nMuons) + " " + str(self.whichCoinc))
-
-                self.detectedMuons += evt.nMuons
-                self.UpdateFlux(evt)
-                sys.stdout.flush()
-            time.sleep(0.2)
+                self.DetectorsFired()
+                        
+                if self.evt.vector is not None:
+                    continue
                 
-
+                self.ShowerRadious()
+                self.ZenithAngle()
+                self.showers[self.evt.nMuons - 1] += 1
+                self.DetectorCoincidence()
+                print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
+                
+                self.lastVector = self.evt.vector
+                self.lastDetectors = self.evt.detectorsFired
+                
+                self.detectedMuons += self.evt.nMuons
+                self.UpdateFlux()
+                sys.stdout.flush()
+                
+                self.q.put(self.flux_per_min)
+                self.q.put(self.TotalFlux())
+                self.q.put(self.zenith_histo)
+            time.sleep(0.2)
+            
+            
+    def InitializeWindow(self):
+        app = tk.Tk()
+        f2 = plt.figure()
+        gs = gridspec.GridSpec(3,3)
+        a = f2.add_subplot(gs[0,:-1])
+        a_txt = f2.add_subplot(gs[0,-1])
+        a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
+        ax_h = f2.add_subplot(gs[-1, -1])
+        plt.ion()
+        
+        
+        
+        canvas = FigureCanvasTkAgg(f2, master = app)
+        canvas.show()
+        
+        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
+        toolbar = NavigationToolbar2TkAgg(canvas, app)
+        toolbar.update()
+        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)   
+        
+        
+        
+        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h], interval=1000)
+        #ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
+        #ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
+        ##ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)
+        
+        
+        plt.draw()
+        app.mainloop()
+        
+    def DetectorsFired(self):
+        #histograms of detectors fired
+        for i in range(4):
+            if self.evt.detectorsFired[i]:
+                self.det_histo[i] += 1
+    
+    def ShowerRadious(self):
+        #histogram of shower radious
+        for i in range(1,7):
+            if self.evt.radius > self.rad_bins[i-1] and self.evt.radius<=self.rad_bins[i]:
+                self.rad_histo[i-1] += 1
+                
+    def ZenithAngle(self):
+        #histogram of zenith angle
+        if self.evt.vector[2] != 0:
+            if self.evt.vector[0] != 0 and self.evt.vector[1] != 0:
+                index = int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180*20/90)
+                for i in range(1,8):
+                    if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
+            else:
+                self.zenith_histo[0] += 1
+        ##                            print ("else")
+                   
+    def DetectorCoincidence(self):      
+        #histogram of detectors coincidence
+        if(self.evt.nMuons == 2):
+            if(self.evt.detectorsFired[0] == 1 and self.evt.detectorsFired[1] == 1): self.whichCoinc[0] += 1
+            elif(self.evt.detectorsFired[0] == 1 and self.evt.detectorsFired[2] == 1): self.whichCoinc[1] += 1
+            elif(self.evt.detectorsFired[0] == 1 and self.evt.detectorsFired[3] == 1): self.whichCoinc[2] += 1
+            elif(self.evt.detectorsFired[1] == 1 and self.evt.detectorsFired[2] == 1): self.whichCoinc[3] += 1
+            elif(self.evt.detectorsFired[1] == 1 and self.evt.detectorsFired[3] == 1): self.whichCoinc[4] += 1
+            elif(self.evt.detectorsFired[2] == 1 and self.evt.detectorsFired[3] == 1): self.whichCoinc[5] += 1
+                    
     def NewMinute(self):
         if int(self.time / 60) != self.minutes and self.newMinute == False:
             self.minutes = int(self.time / 60)
@@ -98,8 +160,8 @@ class Analize():
 ##        if self.time % 3600:  return True  
 ##        else:               return False
                 
-    def UpdateFlux(self, evt):
-        self.muonsInMin += evt.nMuons
+    def UpdateFlux(self):
+        self.muonsInMin += self.evt.nMuons
         if self.newMinute:
             self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff))
             self.flux_per_min = self.flux_per_min[1:62]
