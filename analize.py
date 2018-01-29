@@ -55,10 +55,11 @@ class Analize():
     def anaLoop(self):
         while(1):
             lines = self.ReadOut.getEvents()
+            print("while + 1")
             for i in range(len(lines)):
                 self.evt = event.Event(lines[i])                
                 self.time = self.evt.time
-                print("time = " + str(self.time) + " minutes = " + str(self.minutes))
+                print("time = " + str(time.time()) + "timeEv = " + str(self.time) + " minutes = " + str(self.minutes))
                 self.newMinute = self.NewMinute()
                 self.DetectorsFired()
                 self.detectedMuons += self.evt.nMuons

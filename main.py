@@ -24,6 +24,7 @@ print("loop started")
 threadLoop = threading.Thread(target = Analize.PrintHourFlux)
 threadLoop.start()
 print("print started")
+time.sleep(5)
 Analize.InitializeWindow()
 print("window initialized")
 
