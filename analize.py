@@ -28,8 +28,10 @@ class Analize():
     def __init__(self):
         self.detectedMuons = 0
         self.flux_per_min = np.zeros(60)
+        self.flux_per_10min = np.zeros(144)
         self.zenith_histo = np.zeros(7)
         self.muonsInMin = 0
+        self.muonsIn10Min = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
         self.thread = threading.Thread(target = self.ReadOut.readLoop)
@@ -37,9 +39,11 @@ class Analize():
         #self.ReadOut.readLoop()
         self.constants = constants.Constants()
         self.newMinute = False
+        self.new10Minute = False
 ##        self.newHour = False
         self.flux_hour = []
         self.minutes = 0
+        self.minutes10 = 0
         self.lastVector = [0,0,0]
         self.lastDetectors = [0,0,0,0]
         self.showers = [0, 0, 0, 0]
@@ -75,8 +79,8 @@ class Analize():
                 self.showers[self.evt.nMuons - 1] += 1
                 self.DetectorCoincidence()
                 print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
-                self.q.put(self.flux_per_min)
-                print(self.flux_per_min)
+                self.q.put(self.flux_per_10min)
+                print(self.flux_per_10min)
                 self.q.put(self.TotalFlux())
                 self.q.put(self.zenith_histo)
                 self.lastVector = self.evt.vector
@@ -149,7 +153,12 @@ class Analize():
         else:
             return self.newMinute
 
-
+    def New10Minute(self):
+        if int(self.time / 60) != self.minutes10 and self.new10Minute == False:
+            self.minutes10 = int(self.time / 600)
+            return True 
+        else:
+            return self.new10Minute
     
 ##    def NewHour(self):
 ##        if self.time % 3600:  return True  
@@ -157,12 +166,18 @@ class Analize():
                 
     def UpdateFlux(self):
         self.muonsInMin += self.evt.nMuons
+        self.muonsIn10Min += self.evt.nMuons
         print(self.muonsInMin)
         if self.newMinute:
             self.flux_per_min = np.append(self.flux_per_min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff))
             self.flux_per_min = self.flux_per_min[1:62]
             self.muonsInMin = 0
             self.newMinute = False
+        if self.new10Minute:
+            self.flux_per_10min = np.append(self.flux_per_10min, self.muonsInMin/(4*self.constants.det_area*10000*self.constants.det_eff*self.constants.readOut_eff*10))
+            self.flux_per_10min = self.flux_per_min[1:146]
+            self.muonsIn10Min = 0
+            self.new10Minute = False
         #if self.newHour:
             #self.flux_hour = self.flux_per_min
             #self.flux_per_min = []
