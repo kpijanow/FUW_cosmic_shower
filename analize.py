@@ -29,6 +29,7 @@ class Analize():
         self.detectedMuons = 0
         self.flux_per_min = np.zeros(120)
         self.zenith_histo = np.zeros(7)
+        self.zenith_histo1 = np.zeros(7)
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -86,7 +87,7 @@ class Analize():
                 if self.evt.vector is None:
                     continue
                 
-                self.ShowerRadious()
+                self.ShowerRadius()
                 self.ZenithAngle()
                 self.showers[self.evt.nMuons - 1] += 1
                 self.DetectorCoincidence()
@@ -119,7 +120,8 @@ class Analize():
         gs = gridspec.GridSpec(3,3)
         a = f2.add_subplot(gs[0,:-1])
         a_txt = f2.add_subplot(gs[0,-1])
-        a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
+        #a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
+        a_r = f2.add_subplot(gs[1:,:-1])
         ax_h = f2.add_subplot(gs[-1, -1])
         plt.ion()
         
@@ -135,7 +137,7 @@ class Analize():
         
         
         
-        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h], interval=1000)
+        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h, a_r], interval=1000)
         #ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
         #ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
         ##ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)
@@ -150,8 +152,8 @@ class Analize():
             if self.evt.detectorsFired[i]:
                 self.det_histo[i] += 1
     
-    def ShowerRadious(self):
-        #histogram of shower radious
+    def ShowerRadius(self):
+        #histogram of shower radius
         for i in range(1,7):
             if self.evt.radius > self.rad_bins[i-1] and self.evt.radius<=self.rad_bins[i]:
                 self.rad_histo[i-1] += 1
@@ -165,7 +167,14 @@ class Analize():
 ##                print(str(int(math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180)))
 ##                index = math.atan(math.sqrt(self.evt.vector[0] * self.evt.vector[0] + self.evt.vector[1] * self.evt.vector[1])/self.evt.vector[2])/3.14*180
                 for i in range(1,8):
-                    if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:    self.zenith_histo[i-1] += 1
+                    if index >= self.zenithbins[i-1] and index < self.zenithbins[i]:
+                        self.zenith_histo[i-1] += 1
+                        self.zenith_histo1[i-1] += 1
+            elif self.evt.vector[0] == 0:
+                self.zenith_histo[0] += 1
+                self.zenith_histo1[0] += 1
+            else:
+                self.zenith_histo1[0] += 1
 
                    
     def DetectorCoincidence(self):      
@@ -231,6 +240,7 @@ class Analize():
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
         print("h" + str(self.HourFlux()))
         print("zenith" + str(self.zenith_histo))
+        print("zenith ++" + str(self.zenith_histo1))
         print("showers" + str(self.showers))
         print("det hits" + str(self.det_histo))
         print("radius" + str(self.rad_histo))

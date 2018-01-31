@@ -22,16 +22,18 @@ threadLoop = threading.Thread(target = Analize.anaLoop)
 threadLoop.start()
 threadLoop1 = threading.Thread(target = Analize.PrintZenith)
 threadLoop1.start()
-##Analize.InitializeWindow()
+
 
 
 time.sleep(1)
+##Analize.InitializeWindow()
 ##plt.ion()
 ##time.sleep(1)
 
 ##box = tk.Entry(app)
 ##button = tk.Button(app, text="check", command=self.plot)
 ##fr = tk.Frame()
+
 app = tk.Tk()
 f2 = plt.figure()
 gs = gridspec.GridSpec(3,3)
@@ -40,6 +42,7 @@ a_txt = f2.add_subplot(gs[0,-1])
 ##a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
 a_r = f2.add_subplot(gs[1:,:-1])
 ax_h = f2.add_subplot(gs[-1, -1])
+a_txt2 = f2.add_subplot(gs[1,-1])
 
 plt.ion()
 
@@ -55,7 +58,7 @@ canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 
 
-ani = animation.FuncAnimation(f2, animate, fargs = [Analize.q, a, a_txt, ax_h, a_r], interval=5000)
+ani = animation.FuncAnimation(f2, animate, fargs = [Analize.q, a, a_txt, ax_h, a_r, a_txt2], interval=5000)
 ##ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
 ##ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
 ##ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)

@@ -9,6 +9,7 @@ from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+
 from vec import det_plot
 import time
 import datetime
@@ -16,7 +17,7 @@ import matplotlib.dates as mdates
 
 
 
-def animate(i, q_min, a, a_txt, ax_h, a_r):
+def animate(i, q_min, a, a_txt, ax_h, a_r, a_txt2):
 ##        print("IN ANIMATE")
         xar=[]
 
@@ -30,7 +31,7 @@ def animate(i, q_min, a, a_txt, ax_h, a_r):
         tableOfFluxInEveryMinute=q_min.get_nowait()
         txt=round(q_min.get_nowait(),4)
         recentZenithHisto=q_min.get_nowait()
-        recentRadiousHisto = q_min.get_nowait()
+        recentRadiusHisto = q_min.get_nowait()
 
         timeBin = 120
                 
@@ -41,29 +42,69 @@ def animate(i, q_min, a, a_txt, ax_h, a_r):
 
         localtime = time.localtime(time.time())
         minuteS = 24 * 60 / timeBin
-        xar = [datetime.datetime.now() + datetime.timedelta(minutes=minuteS) * i for i in range(timeBin)]
+        xar = [datetime.datetime.now() - datetime.timedelta(hours=24) + datetime.timedelta(minutes=minuteS) * i for i in range(timeBin)]
 
-        myFmt = mdates.DateFormatter('%H:%M')
+        a.set_xlabel("time")
+        a.set_ylabel("[$cm^{-2} s^{-1}$]")
+        myFmt = mdates.DateFormatter('%H:%M')        
         a.xaxis.set_major_formatter(myFmt)
+        
+
         a.clear()
         #print(tableOfFluxInEveryMinute)
         a.plot(xar, tableOfFluxInEveryMinute)
         #a.autofmt_xdate()
+        
         a_txt.clear()
-        a_txt.axis('off')
-        a_txt.text(0.7,1, "QNet", horizontalalignment='right',
-        verticalalignment='top', fontsize = 60,
+        a_txt.axis('off') 
+        a_txt.text(0.7,1, "QuarkNet", horizontalalignment='right',
+        verticalalignment='top', fontsize = 50,
         transform=a_txt.transAxes)
-        a_txt.text(0.7,0.5, txt, horizontalalignment='right',
-        verticalalignment='top', fontsize = 40,
+        a_txt.text(0.7,0.5, "Mean value of flux from\n total acquisition time:\n"+str(txt)+" [$cm^{-2} s^{-1}$]", horizontalalignment='right',
+        verticalalignment='top', fontsize = 20,
         transform=a_txt.transAxes)
+        a_txt.text(0.7,0.1, "Made by: \n Karol Pijanowski, Karolina Rozwadowska, Katarzyna Wojczuk \n as a part of the classes Zaspołowy projekt studencki", horizontalalignment='right',
+        verticalalignment='top', fontsize = 8,
+        transform=a_txt.transAxes)
+
+        a_txt2.clear()
+        a_txt2.axis('off') 
+        
+        #a_txt.text(0.7,0.5, txt, horizontalalignment='right',
+        #verticalalignment='top', fontsize = 40,
+        #transform=a_txt.transAxes)
+        
         ax_h.clear()
-        #ind = np.arange(len(recentZenithHisto))
-        ind = ["0", "10", "20", "30", "40", "60", "80"]
-        ax_h.bar(ind, recentZenithHisto, color='orange')
+        zen = []
+        if (np.sum(recentZenithHisto)==0):
+                zen = recentZenithHisto
+        else:
+               zen = recentZenithHisto/np.sum(recentZenithHisto)
+               
+        indZ = np.arange(len(recentZenithHisto))
+        labelsZ = ["0", "10", "20", "30", "40", "60", "80"]
+        ax_h.set_xticks(indZ, minor=False)
+        ax_h.set_xticklabels(labelsZ)
+        ax_h.bar(indZ, zen, color='orange', width =1)
+        ax_h.set_title("Zenith angle of cosmic showers distribution")
+        ax_h.set_xlabel("degrees")
+        ax_h.set_ylabel("normalized counts")
+        
         a_r.clear()
-        indR = [2, 3, 4, 5, 6, 9]
-        a_r.bar(indR, recentRadiousHisto, color='red')
+        rad = []
+        if (np.sum(recentRadiusHisto)==0):
+                rad = recentRadiusHisto
+        else:
+               rad = recentRadiusHisto/np.sum(recentRadiusHisto)
+        indR = np.arange(len(recentRadiusHisto))
+        labelsR = [2, 3, 4, 5, 6, 9]
+        
+        a_r.set_xticks(indR, minor=False)
+        a_r.set_xticklabels(labelsR)
+        a_r.set_title("Minimum radius of cosmic showers distribution")
+        a_r.bar(indR, rad, color='red', width = 1)
+        a_r.set_xlabel("radious [m]")
+        a_r.set_ylabel("normalized counts")
 ##        print("OUT OF ANIMATE")
 
 def ani_shower(i, vec_t, vec_d, a_sh):	

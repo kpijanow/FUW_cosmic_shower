@@ -56,7 +56,6 @@ class Event():
             if self.nMuons >= 2:
                 self.detecotrsFired = self.t1 != -1
                 i = np.nonzero(self.t1 != -1)
-                
                 v1 = [self.radius, 0]
                 vector = [0, 0, 0]
                             #if(self.const.v_muon * math.abs(self.t1[i[0][1]] - self.t1[i[0][0]] > 
