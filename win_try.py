@@ -44,10 +44,14 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_txt2):
         minuteS = 24 * 60 / timeBin
         xar = [datetime.datetime.now() - datetime.timedelta(hours=24) + datetime.timedelta(minutes=minuteS) * i for i in range(timeBin)]
 
-        a.set_xlabel("time")
-        a.set_ylabel("[$cm^{-2} s^{-1}$]")
+##        a.set_xlabel("time")
+##        a.set_ylabel("flux [$cm^{-2} min^{-1}$]")
+##        a.set_title("Cosmic muon flux in time")
         myFmt = mdates.DateFormatter('%H:%M')        
         a.xaxis.set_major_formatter(myFmt)
+        a.set_xlabel("time")
+        a.set_ylabel("flux [$cm^{-2} min^{-1}$]")
+        a.set_title("Cosmic muon flux in time")
         
 
         a.clear()
@@ -57,13 +61,16 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_txt2):
         
         a_txt.clear()
         a_txt.axis('off') 
-        a_txt.text(0.7,1, "QuarkNet", horizontalalignment='right',
-        verticalalignment='top', fontsize = 50,
+        a_txt.text(.5,1, "Cosmic Muon Monitor", horizontalalignment='center',
+        verticalalignment='top', fontsize = 35,
         transform=a_txt.transAxes)
-        a_txt.text(0.7,0.5, "Mean value of flux from\n total acquisition time:\n"+str(txt)+" [$cm^{-2} s^{-1}$]", horizontalalignment='right',
+        a_txt.text(0.5,0.7, "Four scintillators provided by QuarkNet \n placed above us monitor \n cosmic muons and air showers. ", horizontalalignment='center',
+        verticalalignment='top', fontsize = 18,
+        transform=a_txt.transAxes)
+        a_txt.text(1,0.3, "Mean value of flux from\n total acquisition time:\n"+str(txt)+" [$cm^{-2} min^{-1}$]", horizontalalignment='right',
         verticalalignment='top', fontsize = 20,
         transform=a_txt.transAxes)
-        a_txt.text(0.7,0.1, "Made by: \n Karol Pijanowski, Karolina Rozwadowska, Katarzyna Wojczuk \n as a part of the classes Zaspołowy projekt studencki", horizontalalignment='right',
+        a_txt.text(1,-0.2, "Made by: \n Karol Pijanowski, Karolina Rozwadowska, Katarzyna Wojczuk \n as a part of the classes Zaspołowy projekt studencki", horizontalalignment='right',
         verticalalignment='top', fontsize = 8,
         transform=a_txt.transAxes)
 
@@ -103,7 +110,7 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_txt2):
         a_r.set_xticklabels(labelsR)
         a_r.set_title("Minimum radius of cosmic showers distribution")
         a_r.bar(indR, rad, color='red', width = 1)
-        a_r.set_xlabel("radious [m]")
+        a_r.set_xlabel("radius [m]")
         a_r.set_ylabel("normalized counts")
 ##        print("OUT OF ANIMATE")
 
