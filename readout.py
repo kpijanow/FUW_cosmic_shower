@@ -31,17 +31,23 @@ class ReadOut():
             return 0
 
     def checkIfNewEvent(self):
-        bits = self.get2Bytes(9)
-        if bits[0] == '1':
+        try:
+            bits = self.get2Bytes(9)
+            if bits[0] == '1':
+                return True
+            else:
+                return False
+        except:
             return True
-        else:
-            return False
-
+        
     def checkIfGoodData(self, i):
-        bits = self.get2Bytes(9 + i * 3)
-        if bits[2] == '1':
-            return True
-        else:
+        try:
+            bits = self.get2Bytes(9 + i * 3)
+            if bits[2] == '1':
+                return True
+            else:
+                return False
+        except:
             return False
 
     def getTimeTicks(self):

@@ -34,7 +34,14 @@ time.sleep(1)
 ##button = tk.Button(app, text="check", command=self.plot)
 ##fr = tk.Frame()
 
+
 app = tk.Tk()
+def end_fullscreen(event = None):
+    app.attributes("-fullscreen", False)
+    return "break"
+
+app.bind("<Escape>", end_fullscreen)
+app.attributes("-fullscreen", True)
 f2 = plt.figure()
 gs = gridspec.GridSpec(3,3)
 a = f2.add_subplot(gs[0,:-1])
