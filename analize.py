@@ -13,15 +13,9 @@ import math as math
 import threading
 import time
 import sys
-
-
-import tkinter as tk
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from win_try import *
 from queue import Queue
-from matplotlib.figure import Figure
+from threading import Lock
+
 
 class Analize():
 
@@ -35,14 +29,13 @@ class Analize():
         self.ReadOut = readout.ReadOut()
         self.thread = threading.Thread(target = self.ReadOut.readLoop)
         self.thread.start()
-        #self.ReadOut.readLoop()
         self.constants = constants.Constants()
         self.newMinute = False
-##        self.newHour = False
         self.flux_hour = []
         self.minutes = 0
         self.lastVector = [0,0,0]
         self.lastDetectors = [0,0,0,0]
+        self.lastArrivalTimes = [0,0,0,0]
         self.showers = [0, 0, 0, 0]
         self.whichCoinc = [0, 0, 0, 0, 0, 0]
         self.zenithbins = [0, 10, 20, 30, 40, 60, 80, 100]
@@ -51,12 +44,14 @@ class Analize():
         self.det_histo = np.zeros(4)
         self.evt = 0
         
-        self.q = Queue(maxsize = 8)
+        self.q = Queue(maxsize = 7)
         
         self.timeInterv = 720 #sec
         self.timeBin = 120
+##        self.mutex = Lock()
     
     def anaLoop(self):
+##        self.mutex.acquire()        #lock begin
         self.q.put_nowait(self.flux_per_min)
         self.q.task_done()
         self.q.put_nowait(self.TotalFlux())
@@ -65,17 +60,17 @@ class Analize():
         self.q.task_done()
         self.q.put_nowait(self.rad_histo)
         self.q.task_done()
-        self.q.put_nowait(self.flux_per_min)
+        self.q.put_nowait(self.lastDetectors)
         self.q.task_done()
-        self.q.put_nowait(self.TotalFlux())
+        self.q.put_nowait(self.lastVector)
         self.q.task_done()
-        self.q.put_nowait(self.zenith_histo)
+        self.q.put_nowait(self.lastArrivalTimes)
         self.q.task_done()
-        self.q.put_nowait(self.rad_histo)
-        self.q.task_done()
+##        self.mutex.release()        #lock end
+        
         while(1):
             lines = self.ReadOut.getEvents()
-##            print("\nn = " + str(len(lines)) + " time = " + str(self.time) )
+            
             for i in range(len(lines)):
                 self.evt = event.Event(lines[i])                
                 self.time = self.evt.time
@@ -95,10 +90,16 @@ class Analize():
                 
                 self.lastVector = self.evt.vector
                 self.lastDetectors = self.evt.detectorsFired
+                self.lastArrivalTimes = self.evt.arrivalTimes
                 sys.stdout.flush()
 
             time.sleep(0.5)
+
+##            self.mutex.acquire()        #Lock begin
             if self.q.full() == True:
+                self.q.get_nowait()
+                self.q.get_nowait()
+                self.q.get_nowait()
                 self.q.get_nowait()
                 self.q.get_nowait()
                 self.q.get_nowait()
@@ -112,39 +113,13 @@ class Analize():
             self.q.task_done()
             self.q.put_nowait(self.rad_histo)
             self.q.task_done()
-            
-            
-    def InitializeWindow(self):
-        app = tk.Tk()
-        f2 = plt.figure()
-        gs = gridspec.GridSpec(3,3)
-        a = f2.add_subplot(gs[0,:-1])
-        a_txt = f2.add_subplot(gs[0,-1])
-        #a_sh = f2.add_subplot(gs[1:,:-1], projection='3d')
-        a_r = f2.add_subplot(gs[1:,:-1])
-        ax_h = f2.add_subplot(gs[-1, -1])
-        plt.ion()
-        
-        
-        
-        canvas = FigureCanvasTkAgg(f2, master = app)
-        canvas.show()
-        
-        canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
-        toolbar = NavigationToolbar2TkAgg(canvas, app)
-        toolbar.update()
-        canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)   
-        
-        
-        
-        ani = animation.FuncAnimation(f2, animate, fargs = [self.q, a, a_txt, ax_h, a_r], interval=1000)
-        #ani2 = animation.FuncAnimation(f2, animate_his, fargs = [recentZenithHisto, ax_h], interval=1000)
-        #ani3 = animation.FuncAnimation(f2, ani_shower, fargs = [Analize.lastVector, recentShowerDetectors, a_sh])
-        ##ani4 = animation.FuncAnimation(f2, flux_text, fargs = [q, a_txt], interval=1000)
-        
-        
-        plt.draw()
-        app.mainloop()
+            self.q.put_nowait(self.lastDetectors)
+            self.q.task_done()
+            self.q.put_nowait(self.lastVector)
+            self.q.task_done()
+            self.q.put_nowait(self.lastArrivalTimes)
+            self.q.task_done()
+##            self.mutex.release()        #Lock end
         
     def DetectorsFired(self):
         #histograms of detectors fired
@@ -193,12 +168,6 @@ class Analize():
             return True 
         else:
             return self.newMinute
-
-
-    
-##    def NewHour(self):
-##        if self.time % 3600:  return True  
-##        else:               return False
                 
     def UpdateFlux(self):
         self.muonsInMin += self.evt.nMuons
@@ -207,11 +176,7 @@ class Analize():
             self.flux_per_min = self.flux_per_min[1:self.timeBin + 2]
             self.muonsInMin = 0
             self.newMinute = False
-        #if self.newHour:
-            #self.flux_hour = self.flux_per_min
-            #self.flux_per_min = []
-        
-            
+               
     def HourFlux(self):
         x = self.flux_per_min
         return x
