@@ -8,6 +8,8 @@ import numpy as np
 from random import randint
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.image as mpimg
+import textwrap
 
 
 from vec import det_plot
@@ -18,12 +20,16 @@ from threading import Lock
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
 	
-        a_sh.clear()	
+        a_sh.clear()        
 ##        print("det_plot")
         rot = det_plot(vec_t,vec_d, a_sh)
+        a_sh.set_xlabel("m", fontsize = 14)
+        a_sh.set_ylabel("m", fontsize = 14)
+        a_sh.set_zlabel("time of arival [ns]", fontsize = 12) 
         rot.view_init(elev = 30, azim = -75) #i%360)
+        
 
-def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh):#, a_txt2):
+def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
         try:
 ##                print("IN ANIMATE")
                 xar=[]
@@ -53,29 +59,40 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh):#, a_txt2):
                 minuteS = 24 * 60 / timeBin
                 xar = [datetime.datetime.now() - datetime.timedelta(hours=24) + datetime.timedelta(minutes=minuteS) * i for i in range(timeBin)]
 
+                a.clear()
                 myFmt = mdates.DateFormatter('%H:%M')        
                 a.xaxis.set_major_formatter(myFmt)
-                a.set_xlabel("time")
-                a.set_ylabel("flux [$cm^{-2} min^{-1}$]")
-                a.set_title("Cosmic muon flux in time")
+                a.set_xlabel("time", fontsize = 16)
+                a.set_ylabel("flux [$cm^{-2} min^{-1}$]", fontsize = 16)
+                a.set_title("Cosmic muon flux in time", fontsize = 20)
                 
-
-                a.clear()
                 #print(tableOfFluxInEveryMinute)
                 a.plot(xar, tableOfFluxInEveryMinute)
                 #a.autofmt_xdate()
                 
                 a_txt.clear()
                 a_txt.axis('off') 
-                a_txt.text(.5,1, "Cosmic Muon Monitor", horizontalalignment='center',
+                a_txt.text(0.5,1.15, "Cosmic Muon Monitor", horizontalalignment='center',
                 verticalalignment='top', fontsize = 35,
                 transform=a_txt.transAxes)
-                a_txt.text(0.5,0.8, "Four scintillators provided by QuarkNet \n placed above us monitor \n cosmic muons and air showers. ",
-                           horizontalalignment='center', verticalalignment='top', fontsize = 18, transform=a_txt.transAxes)
-                a_txt.text(1,0.6, "Mean value of flux from\n total acquisition time:\n"+str(txt)+" [$cm^{-2} min^{-1}$]",
-                           horizontalalignment='right', verticalalignment='top', fontsize = 20, transform=a_txt.transAxes)
-                a_txt.text(1,0.4, "Made by: \n Karol Pijanowski, Karolina Rozwadowska, Katarzyna Wojczuk \n as a part of the classes Zaspołowy projekt studencki",
-                           horizontalalignment='right', verticalalignment='top', fontsize = 8, transform=a_txt.transAxes)
+                text = ' '.join(['Four scintillators provided by QuarkNet placed above us monitor cosmic muons and air showers. Positions of the detecors is visualized on the',
+                        '3D plot on the left. The vertical line indicates the time of arival of the muon to the detector in nanoseconds. This time difference allows us',
+                        'to calculate the zenith angle at which the shower came. The distance between the detectors that fired give us an information about the',
+                        'minimal radious of the shower. We are expecting one shower about every few minutes.'])
+                        
+                a_txt.text(0.5,0.8, textwrap.fill(text, 48),
+                           horizontalalignment='center', verticalalignment='top', fontsize = 17, transform=a_txt.transAxes)
+                a_txt.text(0.5,1.0, "Mean value of flux from\n total acquisition time:",
+                           horizontalalignment='center', verticalalignment='top', fontsize = 22, transform=a_txt.transAxes)
+                a_txt.text(0.5,0.89, str(txt)+" [$cm^{-2} min^{-1}$]",
+                           horizontalalignment='center', verticalalignment='top', fontsize = 22, weight = "bold", transform=a_txt.transAxes)
+                a_txt.text(1,0.1, "Made by: \n Karol Pijanowski, Karolina Rozwadowska, Katarzyna Wojczuk \n as a part of the classes Zaspołowy projekt studencki",
+                           horizontalalignment='right', verticalalignment='top', fontsize = 10, transform=a_txt.transAxes)
+
+                img1 = mpimg.imread('/home/pi/Desktop/FUW_cosmic_shower/quarklogo.png')
+                a_png.clear()
+                a_png.axis('off') 
+                a_png.imshow(img1)
 
 ##                a_txt2.clear()
 ##                a_txt2.axis('off') 
@@ -96,9 +113,9 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh):#, a_txt2):
                 ax_h.set_xticks(indZ, minor = False)
                 ax_h.set_xticklabels(labelsZ)
                 ax_h.bar(indZ, zen, color = 'orange', width = 1)
-                ax_h.set_title("Zenith angle of cosmic showers distribution")
-                ax_h.set_xlabel("degrees")
-                ax_h.set_ylabel("normalized counts")
+                ax_h.set_title("Zenith angle distribution", fontsize = 20)
+                ax_h.set_xlabel("degrees", fontsize = 16)
+                ax_h.set_ylabel("normalized counts", fontsize = 16)
                 
                 a_r.clear()
                 rad = []
@@ -111,10 +128,10 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh):#, a_txt2):
                 
                 a_r.set_xticks(indR, minor=False)
                 a_r.set_xticklabels(labelsR)
-                a_r.set_title("Minimum radius of cosmic showers distribution")
+                a_r.set_title("Minimum radius distribution", fontsize = 20)
                 a_r.bar(indR, rad, color='red', width = 1)
-                a_r.set_xlabel("radius [m]")
-                a_r.set_ylabel("normalized counts")
+                a_r.set_xlabel("radius [m]", fontsize = 16)
+                a_r.set_ylabel("normalized counts", fontsize = 16)
                 ani_shower(i, recentArrivalTimes, recentDetectors, a_sh)
 ##                print("OUT OF ANIMATE")
         except Exception as e:

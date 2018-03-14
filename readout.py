@@ -162,10 +162,13 @@ class ReadOut():
                 self.connectToSerial()
                 time.sleep(1)
 
-            for line0 in lines:
-                self.line = line0
-                if self.line != b'':
-                    self.readLine()
+            try:
+                for line0 in lines:
+                    self.line = line0
+                    if self.line != b'':
+                        self.readLine()
+            except Exception as e:
+                print(e)
                 
     def getEvents(self):
         """Get recorded events and clear the list

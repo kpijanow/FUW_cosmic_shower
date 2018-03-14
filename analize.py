@@ -69,57 +69,60 @@ class Analize():
 ##        self.mutex.release()        #lock end
         
         while(1):
-            lines = self.ReadOut.getEvents()
-            
-            for i in range(len(lines)):
-                self.evt = event.Event(lines[i])                
-                self.time = self.evt.time
-                self.newMinute = self.NewMinute()
-                self.DetectorsFired()
-                self.detectedMuons += self.evt.nMuons
-                self.UpdateFlux()
-                        
-                if self.evt.vector is None:
-                    continue
+            try:
+                lines = self.ReadOut.getEvents()
                 
-                self.ShowerRadius()
-                self.ZenithAngle()
-                self.showers[self.evt.nMuons - 1] += 1
-                self.DetectorCoincidence()
-                print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
-                
-                self.lastVector = self.evt.vector
-                self.lastDetectors = self.evt.detectorsFired
-                self.lastArrivalTimes = self.evt.arrivalTimes
-                sys.stdout.flush()
+                for i in range(len(lines)):
+                    self.evt = event.Event(lines[i])                
+                    self.time = self.evt.time
+                    self.newMinute = self.NewMinute()
+                    self.DetectorsFired()
+                    self.detectedMuons += self.evt.nMuons
+                    self.UpdateFlux()
+                            
+                    if self.evt.vector is None:
+                        continue
+                    
+                    self.ShowerRadius()
+                    self.ZenithAngle()
+                    self.showers[self.evt.nMuons - 1] += 1
+                    self.DetectorCoincidence()
+                    print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
+                    
+                    self.lastVector = self.evt.vector
+                    self.lastDetectors = self.evt.detectorsFired
+                    self.lastArrivalTimes = self.evt.arrivalTimes
+                    sys.stdout.flush()
 
-            time.sleep(0.5)
+                time.sleep(0.5)
 
-##            self.mutex.acquire()        #Lock begin
-            if self.q.full() == True:
-                self.q.get_nowait()
-                self.q.get_nowait()
-                self.q.get_nowait()
-                self.q.get_nowait()
-                self.q.get_nowait()
-                self.q.get_nowait()
-                self.q.get_nowait()
-                
-            self.q.put_nowait(self.flux_per_min)
-            self.q.task_done()
-            self.q.put_nowait(self.TotalFlux())
-            self.q.task_done()
-            self.q.put_nowait(self.zenith_histo)
-            self.q.task_done()
-            self.q.put_nowait(self.rad_histo)
-            self.q.task_done()
-            self.q.put_nowait(self.lastDetectors)
-            self.q.task_done()
-            self.q.put_nowait(self.lastVector)
-            self.q.task_done()
-            self.q.put_nowait(self.lastArrivalTimes)
-            self.q.task_done()
-##            self.mutex.release()        #Lock end
+    ##            self.mutex.acquire()        #Lock begin
+                if self.q.full() == True:
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    self.q.get_nowait()
+                    
+                self.q.put_nowait(self.flux_per_min)
+                self.q.task_done()
+                self.q.put_nowait(self.TotalFlux())
+                self.q.task_done()
+                self.q.put_nowait(self.zenith_histo)
+                self.q.task_done()
+                self.q.put_nowait(self.rad_histo)
+                self.q.task_done()
+                self.q.put_nowait(self.lastDetectors)
+                self.q.task_done()
+                self.q.put_nowait(self.lastVector)
+                self.q.task_done()
+                self.q.put_nowait(self.lastArrivalTimes)
+                self.q.task_done()
+    ##            self.mutex.release()        #Lock end
+            except Exception as e:
+                print(e)
         
     def DetectorsFired(self):
         #histograms of detectors fired
