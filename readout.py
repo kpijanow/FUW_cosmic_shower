@@ -168,7 +168,8 @@ class ReadOut():
                     if self.line != b'':
                         self.readLine()
             except Exception as e:
-                print(e)
+                with open("error.txt", "a") as errFile:
+                    errFile.write(e)
                 
     def getEvents(self):
         """Get recorded events and clear the list

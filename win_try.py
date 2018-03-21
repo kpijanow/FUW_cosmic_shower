@@ -19,15 +19,18 @@ import matplotlib.dates as mdates
 from threading import Lock
 
 def ani_shower(i, vec_t, vec_d, a_sh):	
-	
-        a_sh.clear()        
-##        print("det_plot")
-        rot = det_plot(vec_t,vec_d, a_sh)
-        a_sh.set_xlabel("m", fontsize = 14)
-        a_sh.set_ylabel("m", fontsize = 14)
-        a_sh.set_zlabel("time of arival [ns]", fontsize = 12) 
-        rot.view_init(elev = 30, azim = -75) #i%360)
-        
+        try:    
+                a_sh.clear()        
+        ##        print("det_plot")
+                rot = det_plot(vec_t,vec_d, a_sh)
+                a_sh.set_xlabel("m", fontsize = 14)
+                a_sh.set_ylabel("m", fontsize = 14)
+                a_sh.set_zlabel("time of arival [ns]", fontsize = 12) 
+                rot.view_init(elev = 30, azim = -75) #i%360)
+        except Exception as e:
+                with open("error.txt", "a") as errFile:
+                        errFile.write(e)
+                return
 
 def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
         try:
@@ -80,7 +83,7 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
                         'to calculate the zenith angle at which the shower came. The distance between the detectors that fired give us an information about the',
                         'minimal radious of the shower. We are expecting one shower about every few minutes.'])
                         
-                a_txt.text(0.5,0.8, textwrap.fill(text, 48),
+                a_txt.text(0.5,0.8, textwrap.fill(text, 45),
                            horizontalalignment='center', verticalalignment='top', fontsize = 17, transform=a_txt.transAxes)
                 a_txt.text(0.5,1.0, "Mean value of flux from\n total acquisition time:",
                            horizontalalignment='center', verticalalignment='top', fontsize = 22, transform=a_txt.transAxes)
@@ -135,7 +138,8 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
                 ani_shower(i, recentArrivalTimes, recentDetectors, a_sh)
 ##                print("OUT OF ANIMATE")
         except Exception as e:
-                print(e)
+                with open("error.txt", "a") as errFile:
+                        errFile.write(e)
                 return
 
 def animate_his(i, recentZenithHisto, ax_h):

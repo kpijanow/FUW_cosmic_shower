@@ -122,7 +122,8 @@ class Analize():
                 self.q.task_done()
     ##            self.mutex.release()        #Lock end
             except Exception as e:
-                print(e)
+                with open("error.txt", "a") as errFile:
+                    errFile.write(e)
         
     def DetectorsFired(self):
         #histograms of detectors fired

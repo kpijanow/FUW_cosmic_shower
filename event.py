@@ -14,17 +14,21 @@ import math as math
 class Event():
     
     def __init__(self, line):
-        self.const = constants.Constants()
-        self.t1 = np.array(line[0:4]) 
-        self.t2 = np.array(line[4:8])
-        self.time = line[8]        
-##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
-        self.detectorsFired = [0, 0, 0, 0]
-        self.arrivalTimes = [0, 0, 0, 0]
-        self.nMuons = self.coincidence()
-        self.radius = self.getRadius()
-        self.vector = None
-        self.zenith = self.getZenith()
+        try:
+            self.const = constants.Constants()
+            self.t1 = np.array(line[0:4]) 
+            self.t2 = np.array(line[4:8])
+            self.time = line[8]        
+    ##        self.ToT = [j-i for i,j in zip (self.t1, self.t2)]
+            self.detectorsFired = [0, 0, 0, 0]
+            self.arrivalTimes = [0, 0, 0, 0]
+            self.nMuons = self.coincidence()
+            self.radius = self.getRadius()
+            self.vector = None
+            self.zenith = self.getZenith()
+        except Exception as e:
+            with open("error.txt", "a") as errFile:
+                errFile.write(e)
         
     def coincidence(self):
         for i in range(4):
