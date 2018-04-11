@@ -43,7 +43,8 @@ class Analize():
         self.rad_bins = [0, 2, 3, 4, 5, 6, 9]
         self.det_histo = np.zeros(4)
         self.evt = 0
-        
+        self.myfile = open("/home/pi/Desktop/FUW_cosmic_shower/DATA.txt", "a") 
+                    
         self.q = Queue(maxsize = 7)
         
         self.timeInterv = 720 #sec
@@ -71,8 +72,12 @@ class Analize():
         while(1):
             try:
                 lines = self.ReadOut.getEvents()
+
+                nEvents = len(lines)
+                if nEvents > 1000:
+                    nEvents = 1000
                 
-                for i in range(len(lines)):
+                for i in range(nEvents):
                     self.evt = event.Event(lines[i])                
                     self.time = self.evt.time
                     self.newMinute = self.NewMinute()
@@ -87,8 +92,10 @@ class Analize():
                     self.ZenithAngle()
                     self.showers[self.evt.nMuons - 1] += 1
                     self.DetectorCoincidence()
-                    print(str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
-                    
+##                    myfile = open("DATA.txt", "a") 
+                    self.myfile.write("\n"+str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
+                    self.myfile.flush()
+##                    myfile.close()
                     self.lastVector = self.evt.vector
                     self.lastDetectors = self.evt.detectorsFired
                     self.lastArrivalTimes = self.evt.arrivalTimes
@@ -122,8 +129,10 @@ class Analize():
                 self.q.task_done()
     ##            self.mutex.release()        #Lock end
             except Exception as e:
-                with open("error.txt", "a") as errFile:
+                with open("/home/pi/Desktop/FUW_cosmic_shower/error.txt", "a") as errFile:
                     errFile.write(e)
+                    print(e.message)
+                    print(e.args)
         
     def DetectorsFired(self):
         #histograms of detectors fired
@@ -207,6 +216,17 @@ class Analize():
 
     def PrintZenith(self):
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
+##        myfile = open("DATA.txt", "a")   
+##        self.myfile.write("h" + str(self.HourFlux()))
+        self.myfile.write("\n zenith" + str(self.zenith_histo))
+        self.myfile.write("\n zenith ++" + str(self.zenith_histo1))
+        self.myfile.write("\n showers" + str(self.showers))
+        self.myfile.write("\n det hits" + str(self.det_histo))
+        self.myfile.write("\n radius" + str(self.rad_histo))
+        self.myfile.write("\n t" + str(self.TotalFlux()))
+        self.myfile.write("\n"+time.ctime())
+        self.myfile.flush()
+##        myfile.close()
         print("h" + str(self.HourFlux()))
         print("zenith" + str(self.zenith_histo))
         print("zenith ++" + str(self.zenith_histo1))
@@ -215,6 +235,7 @@ class Analize():
         print("radius" + str(self.rad_histo))
         print("t" + str(self.TotalFlux()))
         print(time.ctime())
+        print("---------------------------------------------------------------")
         threading.Timer(3600, self.PrintZenith).start()
 
     def PrintTotalFlux(self):

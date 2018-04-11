@@ -7,6 +7,7 @@ deals with multiple threads
 import analize
 import threading
 import time
+import sys
 import tkinter as tk
 ##import Image
 ##import numpy as np

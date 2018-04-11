@@ -3,6 +3,7 @@ import binascii
 import time
 import glob, os
 import threading
+import sys
 
 class ReadOut():
     
@@ -81,7 +82,8 @@ class ReadOut():
         t[0:4] = self.t1
         t[4:8] = self.t2
         t[8] = self.timeE
-        self.events.append(t)
+        if (len(self.events) < 1500):
+            self.events.append(t)
 
     def process(self):
         self.timeE = time.time() - self.time0
@@ -161,15 +163,24 @@ class ReadOut():
                 self.ser.close()
                 self.connectToSerial()
                 time.sleep(1)
+                lines = []
 
             try:
-                for line0 in lines:
-                    self.line = line0
-                    if self.line != b'':
-                        self.readLine()
+                if (len(lines < 1500))
+                    for line0 in lines:
+                        self.line = line0
+                        if self.line != b'':
+                            self.readLine()
+                else:
+                    for i in range(1200):
+                        self.line = lines[i]
+                        if self.line != b'':
+                            self.readLine()
+                            
             except Exception as e:
                 with open("error.txt", "a") as errFile:
                     errFile.write(e)
+                    print(e.args)
                 
     def getEvents(self):
         """Get recorded events and clear the list

@@ -30,6 +30,7 @@ def ani_shower(i, vec_t, vec_d, a_sh):
         except Exception as e:
                 with open("error.txt", "a") as errFile:
                         errFile.write(e)
+                        print(e.args)
                 return
 
 def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
@@ -140,6 +141,7 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
         except Exception as e:
                 with open("error.txt", "a") as errFile:
                         errFile.write(e)
+                        print(e.args)
                 return
 
 def animate_his(i, recentZenithHisto, ax_h):
