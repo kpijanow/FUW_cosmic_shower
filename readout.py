@@ -166,7 +166,7 @@ class ReadOut():
                 lines = []
 
             try:
-                if (len(lines < 1500))
+                if (len(lines) < 1500):
                     for line0 in lines:
                         self.line = line0
                         if self.line != b'':
