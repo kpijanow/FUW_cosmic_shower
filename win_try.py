@@ -82,7 +82,7 @@ def animate(i, q_min, a, a_txt, ax_h, a_r, a_sh, a_png):#, a_txt2):
                 text = ' '.join(['Four scintillators provided by QuarkNet placed above us monitor cosmic muons and air showers. Positions of the detecors is visualized on the',
                         '3D plot on the left. The vertical line indicates the time of arival of the muon to the detector in nanoseconds. This time difference allows us',
                         'to calculate the zenith angle at which the shower came. The distance between the detectors that fired give us an information about the',
-                        'minimal radious of the shower. We are expecting one shower about every few minutes.'])
+                        'minimal radius of the shower. We are expecting one shower about every few minutes.'])
                         
                 a_txt.text(0.5,0.8, textwrap.fill(text, 45),
                            horizontalalignment='center', verticalalignment='top', fontsize = 17, transform=a_txt.transAxes)

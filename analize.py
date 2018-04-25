@@ -15,15 +15,31 @@ import time
 import sys
 from queue import Queue
 from threading import Lock
+import resource
+import os
 
 
 class Analize():
 
     def __init__(self):
         self.detectedMuons = 0
-        self.flux_per_min = np.zeros(120)
-        self.zenith_histo = np.zeros(7)
+        
+##        if os.stat("DATA_zenith.txt").st_size == 0:
+##            self.zenith_histo = np.zeros(7)
+##        else:   self.zenith_histo = open("DATA_zenith.txt", "r")
+        self.zenith_histo = np.zeros(7)        
+        if os.stat("DATA_hour.txt").st_size == 0:
+            self.flux_per_min = np.zeros(120)
+        else:   self.flux_per_min = open("DATA_hour.txt", "r")
+        
+        if os.stat("DATA_radius.txt").st_size == 0:
+            self.rad_histo = np.zeros(6)
+        else:   self.rad_histo = open("DATA_radius.txt", "r")
+        
+##        self.flux_per_min = np.zeros(120)
+##        
         self.zenith_histo1 = np.zeros(7)
+##        self.rad_histo = np.zeros(6) 
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -39,11 +55,12 @@ class Analize():
         self.showers = [0, 0, 0, 0]
         self.whichCoinc = [0, 0, 0, 0, 0, 0]
         self.zenithbins = [0, 10, 20, 30, 40, 60, 80, 100]
-        self.rad_histo = np.zeros(6)
         self.rad_bins = [0, 2, 3, 4, 5, 6, 9]
         self.det_histo = np.zeros(4)
         self.evt = 0
-        self.myfile = open("/home/pi/Desktop/FUW_cosmic_shower/DATA.txt", "a") 
+##        self.myfile_zenith = open("DATA_zenith.txt", "w") 
+##        self.myfile_radius = open("DATA_radius.txt", "w") 
+##        self.myfile_hour = open("DATA_hour.txt", "w") 
                     
         self.q = Queue(maxsize = 7)
         
@@ -93,8 +110,8 @@ class Analize():
                     self.showers[self.evt.nMuons - 1] += 1
                     self.DetectorCoincidence()
 ##                    myfile = open("DATA.txt", "a") 
-                    self.myfile.write("\n"+str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
-                    self.myfile.flush()
+##                    self.myfile.write("\n"+str(self.evt.vector) + " coincidence = " + str(self.evt.nMuons) + " " + str(self.whichCoinc))
+##                    self.yfile.flush()
 ##                    myfile.close()
                     self.lastVector = self.evt.vector
                     self.lastDetectors = self.evt.detectorsFired
@@ -129,7 +146,7 @@ class Analize():
                 self.q.task_done()
     ##            self.mutex.release()        #Lock end
             except Exception as e:
-                with open("/home/pi/Desktop/FUW_cosmic_shower/error.txt", "a") as errFile:
+                with open("error.txt", "a") as errFile:
                     errFile.write(e)
                     print(e.message)
                     print(e.args)
@@ -218,14 +235,22 @@ class Analize():
         # every hour get list flux per min in previous hour -> then show average or whatever in a histo
 ##        myfile = open("DATA.txt", "a")   
 ##        self.myfile.write("h" + str(self.HourFlux()))
-        self.myfile.write("\n zenith" + str(self.zenith_histo))
-        self.myfile.write("\n zenith ++" + str(self.zenith_histo1))
-        self.myfile.write("\n showers" + str(self.showers))
-        self.myfile.write("\n det hits" + str(self.det_histo))
-        self.myfile.write("\n radius" + str(self.rad_histo))
-        self.myfile.write("\n t" + str(self.TotalFlux()))
-        self.myfile.write("\n"+time.ctime())
-        self.myfile.flush()
+##        self.myfile_zenith.write(str(self.zenith_histo))
+##        self.myfile_hour.write( str(self.HourFlux()))
+##        self.myfile_radius.write("\n radius" + str(self.rad_histo))
+##        self.myfile.write("\n t" + str(self.TotalFlux()))
+##        self.myfile.write("\n"+time.ctime())
+##        self.myfile.write('Memory usage: ' + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + '(kb)')
+        print (os.path.exists("DATA_zenith.txt"))
+        myfile_zenith = open("DATA_zenith.txt", "w")
+        myfile_zenith.write(str(self.zenith_histo))
+##        myfile_hour.write( str(self.HourFlux()))
+##        myfile_radius.write("\n radius" + str(self.rad_histo))
+##        myfile_hour.flush()
+##        myfile_radius.flush()
+        myfile_zenith.flush()
+        myfile_zenith.close()
+
 ##        myfile.close()
         print("h" + str(self.HourFlux()))
         print("zenith" + str(self.zenith_histo))
@@ -235,8 +260,9 @@ class Analize():
         print("radius" + str(self.rad_histo))
         print("t" + str(self.TotalFlux()))
         print(time.ctime())
+        print ('Memory usage: ' + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + '(kb)')
         print("---------------------------------------------------------------")
-        threading.Timer(3600, self.PrintZenith).start()
+        threading.Timer(36, self.PrintZenith).start()
 
     def PrintTotalFlux(self):
         # every hour update the total detected flux
