@@ -4,4 +4,5 @@
 cd /
 cd /home/pi/Desktop/FUW_cosmic_shower/
 sleep 10
-python3 main.py > logStartup.txt
+sudo shutdown -r 1:00
+sudo python3 main.py &>> logDesktop.txt
