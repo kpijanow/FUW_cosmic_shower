@@ -23,23 +23,47 @@ class Analize():
 
     def __init__(self):
         self.detectedMuons = 0
+        print (os.getcwd())
+        os.chdir("/home/pi/Desktop/FUW_cosmic_shower")
         
-##        if os.stat("DATA_zenith.txt").st_size == 0:
-##            self.zenith_histo = np.zeros(7)
-##        else:   self.zenith_histo = open("DATA_zenith.txt", "r")
-        self.zenith_histo = np.zeros(7)        
+        if os.stat("DATA_zenith.txt").st_size == 0:
+            self.zenith_histo = np.zeros(7)
+        else:
+            file = open("DATA_zenith.txt", "r")
+            helper = file.read().split("  ")
+            print (helper)
+            file.close()
+            helper[0] = helper[0].replace("[ ","")
+            helper[-1] = helper[-1].replace("]","")
+            print (helper)
+            self.zenith_histo = np.array([float(i) for i in helper])
+      
         if os.stat("DATA_hour.txt").st_size == 0:
             self.flux_per_min = np.zeros(120)
-        else:   self.flux_per_min = open("DATA_hour.txt", "r")
+        else:
+            file = open("DATA_hour.txt", "r")
+            helper = file.read().split("  ")
+            file.close()
+            helper[0] = helper[0].replace("[","")
+            helper[-1] = helper[-1].replace("]","")
+            self.flux_per_min = np.array([float(i) for i in helper])
         
         if os.stat("DATA_radius.txt").st_size == 0:
+            print("elsr")
             self.rad_histo = np.zeros(6)
-        else:   self.rad_histo = open("DATA_radius.txt", "r")
+        else:
+            print("if")
+            file = open("DATA_radius.txt", "r")
+            helper = file.read().split("  ")
+            file.close()
+            helper[0] = helper[0].replace("[","")
+            helper[-1] = helper[-1].replace("]","")
+            self.rad_histo = np.array([float(i) for i in helper])
         
 ##        self.flux_per_min = np.zeros(120)
-##        
         self.zenith_histo1 = np.zeros(7)
-##        self.rad_histo = np.zeros(6) 
+##        self.rad_histo = np.zeros(6)
+##        self.readData()
         self.muonsInMin = 0
         self.time = 0
         self.ReadOut = readout.ReadOut()
@@ -241,15 +265,24 @@ class Analize():
 ##        self.myfile.write("\n t" + str(self.TotalFlux()))
 ##        self.myfile.write("\n"+time.ctime())
 ##        self.myfile.write('Memory usage: ' + str(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss) + '(kb)')
-        print (os.path.exists("DATA_zenith.txt"))
+        print (os.getcwd())
+        os.chdir("/home/pi/Desktop/FUW_cosmic_shower")
+        print (os.getcwd())
+
         myfile_zenith = open("DATA_zenith.txt", "w")
         myfile_zenith.write(str(self.zenith_histo))
-##        myfile_hour.write( str(self.HourFlux()))
-##        myfile_radius.write("\n radius" + str(self.rad_histo))
-##        myfile_hour.flush()
-##        myfile_radius.flush()
         myfile_zenith.flush()
         myfile_zenith.close()
+
+        myfile_radius = open("DATA_radius.txt", "w")
+        myfile_radius.write(str(self.rad_histo))
+        myfile_radius.flush()
+        myfile_radius.close()
+
+        myfile_hour = open("DATA_hour.txt", "w")
+        myfile_hour.write(str(self.HourFlux()))
+        myfile_hour.flush()
+        myfile_hour.close()
 
 ##        myfile.close()
         print("h" + str(self.HourFlux()))
