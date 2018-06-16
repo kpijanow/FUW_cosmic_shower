@@ -12,7 +12,8 @@ Po zainstalowaniu systemu (zalecany: Rasbian GNU/Linux 8.0) należy otworzyć te
   cp launcher.sh ../
   cd ..
   chmod +x launcher.sh
-
+  
+  
 Następnie do pliku /home/pi/.config/lxsession/LXDE-pi/autostart należy dodać linię:
 @/home/pi/Desktop/launcher.sh
 
